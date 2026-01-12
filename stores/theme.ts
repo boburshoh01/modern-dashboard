@@ -1,29 +1,16 @@
 import { defineStore } from 'pinia'
-import type { ThemeMode } from '~/types'
 
-interface ThemeState {
-  mode: ThemeMode
-  sidebarCollapsed: boolean
-}
+export type ThemeMode = 'light' | 'dark' | 'system'
 
 export const useThemeStore = defineStore('theme', {
-  state: (): ThemeState => ({
-    mode: 'light',
-    sidebarCollapsed: false
+  state: () => ({
+    mode: 'system' as ThemeMode,
+    isDark: false,
   }),
 
   getters: {
-    isDark: (state) => {
-      if (state.mode === 'system') {
-        if (import.meta.client) {
-          return window.matchMedia('(prefers-color-scheme: dark)').matches
-        }
-        return false
-      }
-      return state.mode === 'dark'
-    },
     currentMode: (state) => state.mode,
-    isSidebarCollapsed: (state) => state.sidebarCollapsed
+    isDarkMode: (state) => state.isDark,
   },
 
   actions: {
@@ -32,60 +19,54 @@ export const useThemeStore = defineStore('theme', {
       this.applyTheme()
     },
 
-    toggleMode() {
-      if (this.mode === 'light') {
-        this.mode = 'dark'
-      } else if (this.mode === 'dark') {
-        this.mode = 'system'
-      } else {
+    toggleTheme() {
+      if (this.mode === 'system') {
         this.mode = 'light'
+      } else if (this.mode === 'light') {
+        this.mode = 'dark'
+      } else {
+        this.mode = 'system'
       }
-      this.applyTheme()
-    },
-
-    toggleDarkMode() {
-      this.mode = this.mode === 'dark' ? 'light' : 'dark'
       this.applyTheme()
     },
 
     applyTheme() {
-      if (import.meta.client) {
-        const isDark = this.isDark
-        document.documentElement.classList.toggle('dark', isDark)
+      if (typeof window === 'undefined') return
 
-        // Update meta theme-color
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]')
-        if (metaThemeColor) {
-          metaThemeColor.setAttribute('content', isDark ? '#111827' : '#ffffff')
-        }
+      let isDark = false
+
+      if (this.mode === 'system') {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      } else {
+        isDark = this.mode === 'dark'
       }
-    },
 
-    toggleSidebar() {
-      this.sidebarCollapsed = !this.sidebarCollapsed
-    },
+      this.isDark = isDark
 
-    setSidebarCollapsed(collapsed: boolean) {
-      this.sidebarCollapsed = collapsed
+      if (isDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
     },
 
     initTheme() {
       this.applyTheme()
 
-      // Listen for system theme changes
-      if (import.meta.client && this.mode === 'system') {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        mediaQuery.addEventListener('change', () => {
-          if (this.mode === 'system') {
-            this.applyTheme()
-          }
-        })
+      if (typeof window !== 'undefined') {
+        window.matchMedia('(prefers-color-scheme: dark)')
+          .addEventListener('change', () => {
+            if (this.mode === 'system') {
+              this.applyTheme()
+            }
+          })
       }
-    }
+    },
   },
 
   persist: {
     key: 'theme',
-    pick: ['mode', 'sidebarCollapsed']
-  }
+    storage: typeof window !== 'undefined' ? localStorage : undefined,
+    paths: ['mode'],
+  },
 })

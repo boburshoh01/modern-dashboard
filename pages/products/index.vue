@@ -1,436 +1,243 @@
 <template>
   <div class="space-y-6">
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ $t('products.title') }}
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">
-          {{ $t('common.total') }}: {{ total }} {{ $t('common.items') }}
-        </p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Export Buttons -->
-        <a-dropdown>
-          <a-button>
-            {{ $t('common.export') }}
-            <DownOutlined />
-          </a-button>
-          <template #overlay>
-            <a-menu>
-              <a-menu-item key="csv" @click="handleExportCSV">
-                {{ $t('products.exportCSV') }}
-              </a-menu-item>
-              <a-menu-item key="excel" @click="handleExportExcel">
-                {{ $t('products.exportExcel') }}
-              </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
-
-        <!-- Add Product Button -->
-        <a-button type="primary" @click="openCreateModal">
-          <PlusOutlined />
-          {{ $t('products.addProduct') }}
-        </a-button>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card p-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Search -->
-        <a-input-search
-          v-model:value="searchQuery"
-          :placeholder="$t('common.search') + '...'"
-          allow-clear
-          @search="handleSearch"
-        />
-
-        <!-- Category Filter -->
-        <a-select
-          v-model:value="selectedCategory"
-          :placeholder="$t('products.category')"
-          allow-clear
-          @change="handleCategoryChange"
-        >
-          <a-select-option v-for="cat in categories" :key="cat.slug" :value="cat.slug">
-            {{ cat.name }}
-          </a-select-option>
-        </a-select>
-
-        <!-- Sort By -->
-        <a-select
-          v-model:value="sortBy"
-          :placeholder="$t('common.sortBy') || 'Sort by'"
-          allow-clear
-          @change="handleSortChange"
-        >
-          <a-select-option value="price">{{ $t('products.price') }}</a-select-option>
-          <a-select-option value="rating">{{ $t('products.rating') }}</a-select-option>
-          <a-select-option value="stock">{{ $t('products.stock') }}</a-select-option>
-          <a-select-option value="title">{{ $t('products.productName') }}</a-select-option>
-        </a-select>
-
-        <!-- Clear Filters -->
-        <a-button @click="handleClearFilters">
-          {{ $t('common.clear') }}
-        </a-button>
-      </div>
-    </div>
-
-    <!-- Products Table -->
-    <div class="card overflow-hidden">
-      <a-table
-        :columns="columns"
-        :data-source="products"
-        :loading="loading"
-        :pagination="pagination"
-        :row-selection="rowSelection"
-        row-key="id"
-        :scroll="{ x: 1500 }"
-        @change="handleTableChange"
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <h1
+        class="text-3xl font-bold text-[#202224] dark:text-white tracking-tight font-['Nunito_Sans']"
       >
-        <!-- Thumbnail -->
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'thumbnail'">
-            <img
-              :src="record.thumbnail"
-              :alt="record.title"
-              class="w-12 h-12 rounded-lg object-cover"
-            />
-          </template>
-
-          <!-- Title & Description -->
-          <template v-else-if="column.key === 'title'">
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">{{ record.title }}</p>
-              <p class="text-sm text-gray-500 truncate max-w-xs">{{ record.description }}</p>
-            </div>
-          </template>
-
-          <!-- Price -->
-          <template v-else-if="column.key === 'price'">
-            <div>
-              <span class="font-medium">${{ record.price }}</span>
-              <span v-if="record.discountPercentage > 0" class="ml-2 text-sm text-success-500">
-                -{{ record.discountPercentage }}%
-              </span>
-            </div>
-          </template>
-
-          <!-- Rating -->
-          <template v-else-if="column.key === 'rating'">
-            <a-rate :value="record.rating" disabled allow-half :count="5" />
-            <span class="ml-2 text-sm text-gray-500">{{ record.rating }}</span>
-          </template>
-
-          <!-- Stock & Availability -->
-          <template v-else-if="column.key === 'stock'">
-            <div>
-              <span>{{ record.stock }}</span>
-              <a-tag
-                :color="getStockStatusColor(record.availabilityStatus)"
-                class="ml-2"
-              >
-                {{ record.availabilityStatus }}
-              </a-tag>
-            </div>
-          </template>
-
-          <!-- Category -->
-          <template v-else-if="column.key === 'category'">
-            <a-tag color="blue">{{ record.category }}</a-tag>
-          </template>
-
-          <!-- Actions -->
-          <template v-else-if="column.key === 'actions'">
-            <a-space>
-              <a-tooltip :title="$t('common.view') || 'View'">
-                <a-button type="text" size="small" @click="viewProduct(record)">
-                  <EyeOutlined />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip :title="$t('common.edit')">
-                <a-button type="text" size="small" @click="editProduct(record)">
-                  <EditOutlined />
-                </a-button>
-              </a-tooltip>
-              <a-popconfirm
-                :title="$t('products.deleteConfirm')"
-                @confirm="deleteProduct(record.id)"
-              >
-                <a-tooltip :title="$t('common.delete')">
-                  <a-button type="text" danger size="small">
-                    <DeleteOutlined />
-                  </a-button>
-                </a-tooltip>
-              </a-popconfirm>
-            </a-space>
-          </template>
-        </template>
-      </a-table>
+        {{ $t("products.title") }}
+      </h1>
+      <NuxtLink to="/products/add">
+        <a-button
+          type="primary"
+          size="large"
+          class="bg-[#4880ff] h-11 px-6 rounded-lg font-semibold flex items-center gap-2 shadow-sm border-none"
+        >
+          <PlusOutlined /> {{ $t("products.addProduct") }}
+        </a-button>
+      </NuxtLink>
     </div>
 
-    <!-- Bulk Actions -->
-    <div v-if="selectedRowKeys.length > 0" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-      <div class="card p-4 flex items-center gap-4 shadow-lg">
-        <span class="text-sm text-gray-600 dark:text-gray-400">
-          {{ selectedRowKeys.length }} {{ $t('common.selected') || 'selected' }}
-        </span>
-        <a-button danger @click="handleBulkDelete">
-          {{ $t('products.bulkDelete') }}
+    <div
+      class="relative bg-[#4880FF] rounded-2xl overflow-hidden min-h-[300px] flex items-center shadow-lg"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-[#4880FF] to-[#6C9AFF]"
+      />
+
+      <div class="relative z-10 px-12 py-10 w-full max-w-2xl text-white">
+        <p class="text-sm font-medium opacity-90 mb-2">
+          {{ $t("products.heroDate") }}
+        </p>
+        <h2
+          class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight"
+          v-html="$t('products.heroTitle')"
+        />
+        <p class="text-lg opacity-80 mb-8 font-light">
+          {{ $t("products.heroSubtitle") }}
+        </p>
+        <a-button
+          size="large"
+          class="bg-[#FF8743] hover:bg-[#FF9F6A] text-white border-none h-12 px-8 rounded-xl font-bold text-base shadow-md"
+        >
+          {{ $t("products.getStarted") }}
         </a-button>
-        <a-button @click="selectedRowKeys = []">
-          {{ $t('common.cancel') }}
-        </a-button>
+      </div>
+
+      <div
+        class="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20"
+      />
+      <div
+        class="absolute bottom-0 right-[20%] w-64 h-64 bg-white opacity-5 rounded-full blur-2xl"
+      />
+
+      <button
+        class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+      >
+        <LeftOutlined class="text-xl" />
+      </button>
+      <button
+        class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
+      >
+        <RightOutlined class="text-xl" />
+      </button>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <a-input
+        v-model:value="searchQuery"
+        :placeholder="$t('products.search')"
+        class="search-input rounded-full w-full sm:w-64 h-[38px] hidden sm:block"
+        :bordered="false"
+        @press-enter="handleSearch"
+      >
+        <template #prefix><SearchOutlined class="text-gray-400" /></template>
+      </a-input>
+      <a-select
+        v-model:value="selectedCategory"
+        :placeholder="$t('products.category')"
+        size="large"
+        :bordered="false"
+        allow-clear
+        class="w-40 rounded-full bg-[#f5f6fa] dark:bg-dark-card"
+        @change="handleFilter"
+      >
+        <a-select-option
+          v-for="cat in productsStore.categories"
+          :key="cat.slug || cat"
+          :value="cat.slug || cat"
+        >
+          {{ cat.name || cat }}
+        </a-select-option>
+      </a-select>
+    </div>
+
+    <div v-if="productsStore.loading" class="flex justify-center py-20">
+      <a-spin size="large" />
+    </div>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        v-for="product in productsStore.products"
+        :key="product.id"
+        class="bg-white dark:bg-dark-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group border border-transparent dark:border-dark-border/50"
+      >
+        <div
+          class="relative h-64 bg-[#F9F9F9] dark:bg-white rounded-xl flex items-center justify-center mb-5 overflow-hidden group/image"
+        >
+          <img
+            :src="product.thumbnail"
+            :alt="product.title"
+            class="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-500 group-hover/image:scale-110"
+          />
+
+          <button
+            class="absolute left-3 w-9 h-9 rounded-full bg-[#FAFAFA] dark:bg-dark-main/80 hover:bg-white dark:hover:bg-dark-main flex items-center justify-center text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white shadow-sm opacity-0 group-hover/image:opacity-100 transition-opacity"
+          >
+            <LeftOutlined class="text-xs" />
+          </button>
+          <button
+            class="absolute right-3 w-9 h-9 rounded-full bg-[#FAFAFA] dark:bg-dark-main/80 hover:bg-white dark:hover:bg-dark-main flex items-center justify-center text-gray-500 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white shadow-sm opacity-0 group-hover/image:opacity-100 transition-opacity"
+          >
+            <RightOutlined class="text-xs" />
+          </button>
+        </div>
+
+        <div class="flex flex-col flex-1 px-1">
+          <div class="flex items-start justify-between mb-4">
+            <div class="space-y-1">
+              <h3
+                class="font-bold text-[#202224] dark:text-white text-lg line-clamp-1 tracking-tight"
+              >
+                {{ product.title }}
+              </h3>
+              <p class="text-[#4880FF] font-bold text-base">
+                ${{ product.price }}
+              </p>
+              <div class="flex items-center gap-1 text-[#FFAD33] text-sm">
+                <template v-for="n in 5" :key="n">
+                  <StarFilled
+                    v-if="Math.round(product.rating) >= n"
+                    class="text-[#FFAD33]"
+                  />
+                  <StarFilled
+                    v-else
+                    class="text-gray-200 dark:text-dark-border"
+                  />
+                </template>
+                <span
+                  class="text-gray-400 dark:text-dark-text-secondary font-medium ml-1"
+                  >({{ product.stock }})</span
+                >
+              </div>
+            </div>
+            <button
+              class="text-gray-400 dark:text-dark-text-secondary bg-[#F5F6FA] dark:bg-dark-main/50 p-2 rounded-full hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all h-[44px] w-[44px] flex items-center justify-center shrink-0 border border-transparent dark:border-dark-border/30 mt-1"
+            >
+              <HeartOutlined class="text-xl" />
+            </button>
+          </div>
+
+          <div class="mt-auto">
+            <NuxtLink :to="`/products/${product.id}`" class="block">
+              <button
+                class="w-full h-[38px] bg-[#F5F6FA] dark:bg-[#4B5668] text-[#202224] dark:text-white font-bold rounded-xl hover:bg-gray-200 dark:hover:opacity-90 transition-all text-sm border border-transparent dark:border-[#4B5668] shadow-sm tracking-wide"
+              >
+                {{ $t("products.editProduct") }}
+              </button>
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Product Modal -->
-    <ProductFormModal
-      v-model:open="modalVisible"
-      :product="currentProduct"
-      :mode="modalMode"
-      @success="handleModalSuccess"
-    />
-
-    <!-- Product Detail Drawer -->
-    <ProductDetailDrawer
-      v-model:open="drawerVisible"
-      :product="currentProduct"
-    />
+    <div class="flex justify-center mt-8 pb-8">
+      <a-pagination
+        v-model:current="currentPage"
+        :total="productsStore.total"
+        :default-page-size="10"
+        :show-size-changer="false"
+        @change="handlePageChange"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {
   PlusOutlined,
-  DownOutlined,
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined
-} from '@ant-design/icons-vue'
-import type { TableColumnType, TablePaginationConfig } from 'ant-design-vue'
-import type { Product } from '~/types'
+  SearchOutlined,
+  LeftOutlined,
+  RightOutlined,
+  HeartOutlined,
+  StarFilled,
+} from "@ant-design/icons-vue";
 
 definePageMeta({
-  middleware: 'auth'
-})
+  layout: "default",
+  middleware: "auth",
+});
 
-const { t } = useI18n()
-const { showSuccess, showError } = useNotification()
-const { exportToCSV, exportToExcel } = useExport()
+const productsStore = useProductsStore();
+const searchQuery = ref("");
+const selectedCategory = ref<string | undefined>(undefined);
+const currentPage = ref(1);
 
-const productsStore = useProductsStore()
-const { products, total, loading, categories } = storeToRefs(productsStore)
+const fetchProducts = async () => {
+  const skip = (currentPage.value - 1) * 10;
+  await productsStore.fetchProducts({
+    limit: 10,
+    skip,
+    q: searchQuery.value,
+    category: selectedCategory.value,
+  });
+};
 
-// State
-const searchQuery = ref('')
-const selectedCategory = ref<string>()
-const sortBy = ref<string>()
-const selectedRowKeys = ref<number[]>([])
-const modalVisible = ref(false)
-const drawerVisible = ref(false)
-const modalMode = ref<'create' | 'edit'>('create')
-const currentProduct = ref<Product | null>(null)
+await Promise.all([fetchProducts(), productsStore.fetchCategories()]);
 
-// Table columns
-const columns: TableColumnType[] = [
-  {
-    title: '',
-    key: 'thumbnail',
-    width: 80,
-    fixed: 'left'
-  },
-  {
-    title: t('products.productName'),
-    key: 'title',
-    dataIndex: 'title',
-    width: 250,
-    sorter: true
-  },
-  {
-    title: t('products.category'),
-    key: 'category',
-    dataIndex: 'category',
-    width: 150
-  },
-  {
-    title: t('products.price'),
-    key: 'price',
-    dataIndex: 'price',
-    width: 150,
-    sorter: true
-  },
-  {
-    title: t('products.rating'),
-    key: 'rating',
-    dataIndex: 'rating',
-    width: 200,
-    sorter: true
-  },
-  {
-    title: t('products.stock'),
-    key: 'stock',
-    dataIndex: 'stock',
-    width: 180,
-    sorter: true
-  },
-  {
-    title: t('products.brand'),
-    key: 'brand',
-    dataIndex: 'brand',
-    width: 120
-  },
-  {
-    title: t('common.actions'),
-    key: 'actions',
-    width: 150,
-    fixed: 'right'
-  }
-]
+const handleSearch = () => {
+  currentPage.value = 1;
+  fetchProducts();
+};
 
-// Pagination
-const pagination = computed<TablePaginationConfig>(() => ({
-  current: productsStore.pagination.page,
-  pageSize: productsStore.pagination.pageSize,
-  total: total.value,
-  showSizeChanger: true,
-  showQuickJumper: true,
-  pageSizeOptions: ['10', '20', '50', '100'],
-  showTotal: (total, range) => `${range[0]}-${range[1]} ${t('common.of')} ${total}`
-}))
+const handleFilter = () => {
+  currentPage.value = 1;
+  fetchProducts();
+};
 
-// Row selection
-const rowSelection = {
-  selectedRowKeys: selectedRowKeys,
-  onChange: (keys: number[]) => {
-    selectedRowKeys.value = keys
-  }
-}
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  fetchProducts();
+};
 
-// Methods
-const handleSearch = (value: string) => {
-  productsStore.setFilters({ search: value })
-}
-
-const handleCategoryChange = (value: string) => {
-  productsStore.setFilters({ category: value })
-}
-
-const handleSortChange = (value: string) => {
-  productsStore.setFilters({ sortBy: value as 'price' | 'rating' | 'stock' | 'title' })
-}
-
-const handleClearFilters = () => {
-  searchQuery.value = ''
-  selectedCategory.value = undefined
-  sortBy.value = undefined
-  productsStore.clearFilters()
-}
-
-const handleTableChange = (
-  pag: TablePaginationConfig,
-  _filters: Record<string, unknown>,
-  sorter: { field?: string; order?: 'ascend' | 'descend' }
-) => {
-  if (pag.current && pag.pageSize) {
-    productsStore.setPage(pag.current)
-    productsStore.setPageSize(pag.pageSize)
-  }
-
-  if (sorter.field) {
-    productsStore.setFilters({
-      sortBy: sorter.field as 'price' | 'rating' | 'stock' | 'title',
-      sortOrder: sorter.order === 'ascend' ? 'asc' : 'desc'
-    })
-  }
-}
-
-const openCreateModal = () => {
-  currentProduct.value = null
-  modalMode.value = 'create'
-  modalVisible.value = true
-}
-
-const viewProduct = (product: Product) => {
-  currentProduct.value = product
-  drawerVisible.value = true
-}
-
-const editProduct = (product: Product) => {
-  currentProduct.value = product
-  modalMode.value = 'edit'
-  modalVisible.value = true
-}
-
-const deleteProduct = async (id: number) => {
-  const result = await productsStore.deleteProduct(id)
-  if (result.success) {
-    showSuccess(t('products.deleteSuccess'))
-  } else {
-    showError(result.error || 'Failed to delete')
-  }
-}
-
-const handleBulkDelete = async () => {
-  const success = await productsStore.deleteSelectedProducts()
-  if (success) {
-    showSuccess(t('products.deleteSuccess'))
-    selectedRowKeys.value = []
-  } else {
-    showError('Failed to delete some products')
-  }
-}
-
-const handleModalSuccess = () => {
-  modalVisible.value = false
-  productsStore.fetchProducts()
-}
-
-const handleExportCSV = () => {
-  exportToCSV(products.value, {
-    filename: 'products',
-    columns: [
-      { key: 'id', title: 'ID' },
-      { key: 'title', title: 'Title' },
-      { key: 'category', title: 'Category' },
-      { key: 'price', title: 'Price' },
-      { key: 'stock', title: 'Stock' },
-      { key: 'rating', title: 'Rating' }
-    ]
-  })
-}
-
-const handleExportExcel = () => {
-  exportToExcel(products.value, {
-    filename: 'products',
-    columns: [
-      { key: 'id', title: 'ID' },
-      { key: 'title', title: 'Title' },
-      { key: 'category', title: 'Category' },
-      { key: 'price', title: 'Price' },
-      { key: 'stock', title: 'Stock' },
-      { key: 'rating', title: 'Rating' }
-    ]
-  })
-}
-
-const getStockStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    'In Stock': 'green',
-    'Low Stock': 'orange',
-    'Out of Stock': 'red'
-  }
-  return colors[status] || 'default'
-}
-
-// Fetch data on mount
-onMounted(() => {
-  productsStore.fetchProducts()
-  productsStore.fetchCategories()
-})
+watch(selectedCategory, () => {
+  handleFilter();
+});
 </script>
+
+<style scoped>
+:deep(.ant-input-search-button) {
+  border-radius: 999px;
+}
+</style>

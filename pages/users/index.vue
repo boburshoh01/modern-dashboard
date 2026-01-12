@@ -1,389 +1,293 @@
 <template>
   <div class="space-y-6">
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ $t('users.title') }}
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">
-          {{ $t('common.total') }}: {{ total }} {{ $t('common.items') }}
-        </p>
-      </div>
-
-      <a-button type="primary" @click="openCreateModal">
-        <PlusOutlined />
-        {{ $t('users.addUser') }}
-      </a-button>
-    </div>
-
-    <!-- Filters -->
-    <div class="card p-4">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <!-- Search -->
-        <a-input-search
-          v-model:value="searchQuery"
-          :placeholder="$t('common.search') + '...'"
-          allow-clear
-          @search="handleSearch"
-        />
-
-        <!-- Gender Filter -->
-        <a-select
-          v-model:value="selectedGender"
-          :placeholder="$t('users.gender')"
-          allow-clear
-          @change="handleGenderChange"
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+    >
+      <h1
+        class="text-3xl font-bold text-[#202224] dark:text-white tracking-tight font-['Nunito_Sans']"
+      >
+        {{ $t("users.title") }}
+      </h1>
+      <NuxtLink to="/users/add">
+        <a-button
+          type="primary"
+          size="large"
+          class="bg-[#4880ff] h-11 px-6 rounded-lg font-semibold flex items-center gap-2 shadow-sm border-none"
         >
-          <a-select-option value="male">{{ $t('users.male') }}</a-select-option>
-          <a-select-option value="female">{{ $t('users.female') }}</a-select-option>
-        </a-select>
-
-        <!-- Role Filter -->
-        <a-select
-          v-model:value="selectedRole"
-          :placeholder="$t('users.role')"
-          allow-clear
-        >
-          <a-select-option value="admin">{{ $t('users.admin') }}</a-select-option>
-          <a-select-option value="moderator">{{ $t('users.moderator') }}</a-select-option>
-          <a-select-option value="user">{{ $t('users.user') }}</a-select-option>
-        </a-select>
-
-        <!-- Sort By -->
-        <a-select
-          v-model:value="sortBy"
-          :placeholder="$t('common.sortBy') || 'Sort by'"
-          allow-clear
-          @change="handleSortChange"
-        >
-          <a-select-option value="firstName">{{ $t('users.firstName') }}</a-select-option>
-          <a-select-option value="lastName">{{ $t('users.lastName') }}</a-select-option>
-          <a-select-option value="age">{{ $t('users.age') }}</a-select-option>
-          <a-select-option value="email">{{ $t('users.email') }}</a-select-option>
-        </a-select>
-
-        <!-- Clear Filters -->
-        <a-button @click="handleClearFilters">
-          {{ $t('common.clear') }}
+          <PlusOutlined /> {{ $t("users.addUser") }}
         </a-button>
+      </NuxtLink>
+    </div>
+
+    <div
+      class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm flex flex-wrap items-center gap-4 border border-gray-100 dark:border-dark-border"
+    >
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <FilterOutlined class="text-gray-400 dark:text-gray-500" />
+        <span class="font-bold text-[#202224] dark:text-white">{{
+          $t("users.filterBy")
+        }}</span>
+      </div>
+
+      <a-select
+        v-model:value="filters.key"
+        placeholder="Field"
+        class="w-full sm:w-32 rounded-lg bg-[#F5F6FA] dark:bg-dark-main"
+        :bordered="false"
+      >
+        <a-select-option value="firstName">{{
+          $t("users.name")
+        }}</a-select-option>
+        <a-select-option value="email">{{ $t("users.email") }}</a-select-option>
+        <a-select-option value="username">{{
+          $t("users.username")
+        }}</a-select-option>
+        <a-select-option value="role">{{ $t("users.role") }}</a-select-option>
+      </a-select>
+
+      <a-input
+        v-model:value="filters.value"
+        placeholder="Value"
+        class="w-full sm:w-48 bg-[#F5F6FA] dark:bg-dark-main dark:text-white border-none rounded-lg"
+      />
+
+      <a-button
+        class="text-[#EA0234] hover:text-red-700 hover:bg-red-50 border-none font-bold flex items-center gap-2 whitespace-nowrap"
+        @click="resetFilters"
+      >
+        <ReloadOutlined /> {{ $t("users.resetFilter") }}
+      </a-button>
+
+      <div class="sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
+        <a-input
+          v-model:value="searchQuery"
+          :placeholder="$t('users.search')"
+          class="search-input rounded-full w-full sm:w-64 h-[38px]"
+          :bordered="false"
+          @press-enter="handleSearch"
+        >
+          <template #prefix><SearchOutlined class="text-gray-400" /></template>
+        </a-input>
       </div>
     </div>
 
-    <!-- Users Table -->
-    <div class="card overflow-hidden">
+    <div
+      class="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-100 dark:border-dark-border overflow-hidden min-w-0"
+    >
       <a-table
         :columns="columns"
-        :data-source="users"
-        :loading="loading"
-        :pagination="pagination"
-        :row-selection="rowSelection"
-        row-key="id"
-        :scroll="{ x: 1400 }"
-        @change="handleTableChange"
+        :data-source="usersStore.users"
+        :loading="usersStore.loading"
+        :pagination="false"
+        :row-key="getRowKey"
+        :scroll="{ x: 1200 }"
       >
         <template #bodyCell="{ column, record }">
-          <!-- User Info -->
-          <template v-if="column.key === 'user'">
+          <template v-if="column.key === 'name'">
             <div class="flex items-center gap-3">
-              <img
-                :src="record.image"
-                :alt="record.firstName"
-                class="w-10 h-10 rounded-full object-cover"
-              />
+              <a-avatar :src="record.image" :size="40" class="bg-gray-200" />
               <div>
-                <p class="font-medium text-gray-900 dark:text-white">
+                <div class="font-bold text-[#202224] dark:text-white">
                   {{ record.firstName }} {{ record.lastName }}
-                </p>
-                <p class="text-sm text-gray-500">@{{ record.username }}</p>
+                </div>
+                <div
+                  v-if="record.maidenName"
+                  class="text-xs text-gray-400 dark:text-gray-500"
+                >
+                  {{ record.maidenName }}
+                </div>
               </div>
             </div>
           </template>
 
-          <!-- Contact -->
-          <template v-else-if="column.key === 'contact'">
-            <div>
-              <p class="text-sm">{{ record.email }}</p>
-              <p class="text-sm text-gray-500">{{ record.phone }}</p>
-            </div>
-          </template>
-
-          <!-- Gender -->
-          <template v-else-if="column.key === 'gender'">
-            <a-tag :color="record.gender === 'male' ? 'blue' : 'pink'">
-              {{ $t(`users.${record.gender}`) }}
-            </a-tag>
-          </template>
-
-          <!-- Address -->
-          <template v-else-if="column.key === 'address'">
-            <div class="text-sm">
-              <p>{{ record.address?.city }}, {{ record.address?.state }}</p>
-              <p class="text-gray-500">{{ record.address?.country }}</p>
-            </div>
-          </template>
-
-          <!-- Company -->
-          <template v-else-if="column.key === 'company'">
-            <div v-if="record.company" class="text-sm">
-              <p class="font-medium">{{ record.company.name }}</p>
-              <p class="text-gray-500">{{ record.company.title }}</p>
-            </div>
-            <span v-else class="text-gray-400">-</span>
-          </template>
-
-          <!-- Role -->
           <template v-else-if="column.key === 'role'">
-            <a-tag :color="getRoleColor(record.role)">
-              {{ $t(`users.${record.role}`) }}
-            </a-tag>
+            <span
+              class="px-3 py-1 rounded-full text-xs font-bold capitalize"
+              :class="{
+                'bg-purple-100 text-purple-600': record.role === 'admin',
+                'bg-blue-100 text-blue-600': record.role === 'moderator',
+                'bg-gray-100 text-gray-600': record.role === 'user',
+              }"
+            >
+              {{ record.role }}
+            </span>
           </template>
 
-          <!-- Status -->
           <template v-else-if="column.key === 'status'">
-            <a-switch
-              :checked="record.status === 'active'"
-              :loading="togglingStatus === record.id"
-              @change="toggleUserStatus(record)"
-            />
+            <span
+              class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600"
+              >Active</span
+            >
           </template>
 
-          <!-- Actions -->
           <template v-else-if="column.key === 'actions'">
-            <a-space>
-              <a-tooltip :title="$t('common.view') || 'View'">
-                <a-button type="text" size="small" @click="viewUser(record)">
-                  <EyeOutlined />
-                </a-button>
-              </a-tooltip>
-              <a-tooltip :title="$t('common.edit')">
-                <a-button type="text" size="small" @click="editUser(record)">
+            <div class="flex items-center gap-2">
+              <NuxtLink :to="`/users/${record.id}`">
+                <a-button
+                  type="text"
+                  shape="circle"
+                  class="bg-gray-50 dark:bg-dark-main hover:bg-gray-100 dark:hover:bg-dark-border text-gray-500 dark:text-gray-300"
+                >
                   <EditOutlined />
                 </a-button>
-              </a-tooltip>
+              </NuxtLink>
               <a-popconfirm
-                :title="$t('users.deleteConfirm')"
-                @confirm="deleteUser(record.id)"
+                title="Are you sure delete this user?"
+                @confirm="handleDelete(record.id)"
               >
-                <a-tooltip :title="$t('common.delete')">
-                  <a-button type="text" danger size="small">
-                    <DeleteOutlined />
-                  </a-button>
-                </a-tooltip>
+                <a-button
+                  type="text"
+                  shape="circle"
+                  class="bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-500"
+                >
+                  <DeleteOutlined />
+                </a-button>
               </a-popconfirm>
-            </a-space>
+            </div>
           </template>
         </template>
       </a-table>
+
+      <div
+        class="flex justify-end p-6 border-t border-gray-100 dark:border-dark-border"
+      >
+        <a-pagination
+          v-model:current="currentPage"
+          :total="usersStore.total"
+          :show-size-changer="false"
+          @change="handlePageChange"
+        />
+      </div>
     </div>
-
-    <!-- User Modal -->
-    <UserFormModal
-      v-model:open="modalVisible"
-      :user="currentUser"
-      :mode="modalMode"
-      @success="handleModalSuccess"
-    />
-
-    <!-- User Detail Drawer -->
-    <UserDetailDrawer
-      v-model:open="drawerVisible"
-      :user="currentUser"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import {
   PlusOutlined,
-  EyeOutlined,
+  FilterOutlined,
+  ReloadOutlined,
   EditOutlined,
-  DeleteOutlined
-} from '@ant-design/icons-vue'
-import type { TableColumnType, TablePaginationConfig } from 'ant-design-vue'
-import type { User } from '~/types'
+  DeleteOutlined,
+} from "@ant-design/icons-vue";
 
 definePageMeta({
-  middleware: 'auth'
-})
+  layout: "default",
+  middleware: "auth",
+});
 
-const { t } = useI18n()
-const { showSuccess, showError } = useNotification()
+const usersStore = useUsersStore();
+const { success, error } = useNotification();
 
-const usersStore = useUsersStore()
-const { users, total, loading } = storeToRefs(usersStore)
+const searchQuery = ref("");
+const filters = reactive({
+  key: undefined as string | undefined,
+  value: undefined as string | undefined,
+});
+const currentPage = ref(1);
 
-// State
-const searchQuery = ref('')
-const selectedGender = ref<string>()
-const selectedRole = ref<string>()
-const sortBy = ref<string>()
-const selectedRowKeys = ref<number[]>([])
-const modalVisible = ref(false)
-const drawerVisible = ref(false)
-const modalMode = ref<'create' | 'edit'>('create')
-const currentUser = ref<User | null>(null)
-const togglingStatus = ref<number | null>(null)
+const { t } = useI18n();
 
-// Table columns
-const columns: TableColumnType[] = [
+const columns = computed(() => [
   {
-    title: t('users.user') || 'User',
-    key: 'user',
+    title: t("users.name"),
+    key: "name",
     width: 250,
-    fixed: 'left'
+    fixed: "left",
   },
   {
-    title: t('users.contact') || 'Contact',
-    key: 'contact',
-    width: 220
+    title: t("users.email"),
+    dataIndex: "email",
+    key: "email",
+    width: 250,
   },
   {
-    title: t('users.age'),
-    key: 'age',
-    dataIndex: 'age',
-    width: 80,
-    sorter: true
+    title: t("users.phone"),
+    dataIndex: "phone",
+    key: "phone",
+    width: 180,
   },
   {
-    title: t('users.gender'),
-    key: 'gender',
-    width: 100
-  },
-  {
-    title: t('users.address'),
-    key: 'address',
-    width: 180
-  },
-  {
-    title: t('users.company'),
-    key: 'company',
-    width: 180
-  },
-  {
-    title: t('users.role'),
-    key: 'role',
-    width: 120
-  },
-  {
-    title: t('users.status'),
-    key: 'status',
-    width: 100
-  },
-  {
-    title: t('common.actions'),
-    key: 'actions',
+    title: t("users.username"),
+    dataIndex: "username",
+    key: "username",
     width: 150,
-    fixed: 'right'
-  }
-]
+  },
+  {
+    title: t("users.role"),
+    key: "role",
+    width: 120,
+  },
+  {
+    title: t("users.status"),
+    key: "status",
+    width: 120,
+  },
+  {
+    title: t("users.action"),
+    key: "actions",
+    width: 120,
+    fixed: "right",
+    align: "center",
+  },
+]);
 
-// Pagination
-const pagination = computed<TablePaginationConfig>(() => ({
-  current: usersStore.pagination.page,
-  pageSize: usersStore.pagination.pageSize,
-  total: total.value,
-  showSizeChanger: true,
-  showQuickJumper: true,
-  pageSizeOptions: ['10', '20', '50', '100'],
-  showTotal: (total, range) => `${range[0]}-${range[1]} ${t('common.of')} ${total}`
-}))
+const fetchUsers = async () => {
+  const skip = (currentPage.value - 1) * 10;
+  await usersStore.fetchUsers({
+    limit: 10,
+    skip,
+    search: searchQuery.value,
+    key: filters.key,
+    value: filters.value,
+  });
+};
 
-// Row selection
-const rowSelection = {
-  selectedRowKeys: selectedRowKeys,
-  onChange: (keys: number[]) => {
-    selectedRowKeys.value = keys
-  }
-}
-
-// Methods
-const handleSearch = (value: string) => {
-  usersStore.setFilters({ search: value })
-}
-
-const handleGenderChange = (value: string) => {
-  usersStore.setFilters({ gender: value })
-}
-
-const handleSortChange = (value: string) => {
-  usersStore.setFilters({ sortBy: value as 'firstName' | 'lastName' | 'age' | 'email' })
-}
-
-const handleClearFilters = () => {
-  searchQuery.value = ''
-  selectedGender.value = undefined
-  selectedRole.value = undefined
-  sortBy.value = undefined
-  usersStore.clearFilters()
-}
-
-const handleTableChange = (
-  pag: TablePaginationConfig,
-  _filters: Record<string, unknown>,
-  sorter: { field?: string; order?: 'ascend' | 'descend' }
-) => {
-  if (pag.current && pag.pageSize) {
-    usersStore.setPage(pag.current)
-    usersStore.setPageSize(pag.pageSize)
-  }
-
-  if (sorter.field) {
-    usersStore.setFilters({
-      sortBy: sorter.field as 'firstName' | 'lastName' | 'age' | 'email',
-      sortOrder: sorter.order === 'ascend' ? 'asc' : 'desc'
-    })
-  }
-}
-
-const openCreateModal = () => {
-  currentUser.value = null
-  modalMode.value = 'create'
-  modalVisible.value = true
-}
-
-const viewUser = (user: User) => {
-  currentUser.value = user
-  drawerVisible.value = true
-}
-
-const editUser = (user: User) => {
-  currentUser.value = user
-  modalMode.value = 'edit'
-  modalVisible.value = true
-}
-
-const deleteUser = async (id: number) => {
-  const result = await usersStore.deleteUser(id)
-  if (result.success) {
-    showSuccess(t('users.deleteSuccess'))
-  } else {
-    showError(result.error || 'Failed to delete')
-  }
-}
-
-const toggleUserStatus = async (user: User) => {
-  togglingStatus.value = user.id
-  await usersStore.toggleUserStatus(user.id)
-  togglingStatus.value = null
-}
-
-const handleModalSuccess = () => {
-  modalVisible.value = false
-  usersStore.fetchUsers()
-}
-
-const getRoleColor = (role: string) => {
-  const colors: Record<string, string> = {
-    admin: 'red',
-    moderator: 'orange',
-    user: 'blue'
-  }
-  return colors[role] || 'default'
-}
-
-// Fetch data on mount
 onMounted(() => {
-  usersStore.fetchUsers()
-})
+  fetchUsers();
+});
+
+const handleSearch = () => {
+  currentPage.value = 1;
+  filters.key = undefined;
+  filters.value = undefined;
+  fetchUsers();
+};
+
+// Watch filters to fetch automatically
+watch(
+  () => [filters.key, filters.value],
+  () => {
+    if (filters.key && filters.value) {
+      searchQuery.value = "";
+      currentPage.value = 1;
+      fetchUsers();
+    }
+  }
+);
+
+const resetFilters = () => {
+  filters.key = undefined;
+  filters.value = undefined;
+  searchQuery.value = "";
+  currentPage.value = 1;
+  fetchUsers();
+};
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  fetchUsers();
+};
+
+const handleDelete = async (id: number) => {
+  try {
+    await usersStore.deleteUser(id);
+    success("Deleted", "User deleted successfully");
+  } catch (err) {
+    console.error(err);
+    error("Error", "Failed to delete user");
+  }
+};
+
+const getRowKey = (record: { id: number }) => record.id;
 </script>

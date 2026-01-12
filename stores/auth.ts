@@ -1,137 +1,160 @@
 import { defineStore } from 'pinia'
-import type { User, LoginCredentials } from '~/types'
-import type { LoginResponse } from '~/types/api'
-
-interface AuthState {
-  user: User | null
-  accessToken: string | null
-  refreshToken: string | null
-  isAuthenticated: boolean
-  loading: boolean
-  error: string | null
-}
+import type { AuthUser, LoginCredentials, RefreshTokenResponse } from '~/types'
 
 export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    user: null,
-    accessToken: null,
-    refreshToken: null,
+  state: () => ({
+    user: null as AuthUser | null,
+    token: null as string | null,
     isAuthenticated: false,
     loading: false,
-    error: null
+    error: null as string | null,
   }),
 
   getters: {
-    getUser: (state) => state.user,
-    getToken: (state) => state.accessToken,
-    isLoggedIn: (state) => state.isAuthenticated && !!state.accessToken,
-    userFullName: (state) =>
-      state.user ? `${state.user.firstName} ${state.user.lastName}` : '',
-    userRole: (state) => state.user?.role || 'user'
+    currentUser: (state) => state.user,
+    isLoggedIn: (state) => state.isAuthenticated && !!state.token,
   },
 
   actions: {
     async login(credentials: LoginCredentials) {
       this.loading = true
       this.error = null
+      const config = useRuntimeConfig()
+
+      const tokenCookie = useCookie('auth_token', {
+        maxAge: 60 * 60 * 24 * 7,
+        secure: true,
+        sameSite: 'strict'
+      })
 
       try {
-        const config = useRuntimeConfig()
-        const response = await $fetch<LoginResponse>(
-          `${config.public.apiBase}/auth/login`,
-          {
-            method: 'POST',
-            body: {
-              username: credentials.username,
-              password: credentials.password,
-              expiresInMins: credentials.expiresInMins || 60
-            }
-          }
-        )
+        const response = await $fetch<AuthUser>('/auth/login', {
+          method: 'POST',
+          body: credentials,
+          baseURL: config.public.apiBase as string
+        })
 
-        this.accessToken = response.accessToken
-        this.refreshToken = response.refreshToken
+        this.user = {
+          ...response,
+          token: response.accessToken || ''
+        }
+        this.token = response.accessToken || null
         this.isAuthenticated = true
+        tokenCookie.value = response.accessToken || null
 
-        // Fetch full user data
-        await this.fetchUser()
-
-        return { success: true }
-      } catch (error: unknown) {
-        const err = error as { data?: { message?: string } }
-        this.error = err.data?.message || 'Login failed'
-        return { success: false, error: this.error }
+        return response
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Login failed'
+        console.error('Login error:', err)
+        throw err
       } finally {
         this.loading = false
       }
     },
 
-    async fetchUser() {
-      if (!this.accessToken) return
+    async logout() {
+      const tokenCookie = useCookie('auth_token')
 
-      try {
-        const config = useRuntimeConfig()
-        const response = await $fetch<User>(`${config.public.apiBase}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`
-          }
-        })
-
-        this.user = response
-      } catch (error) {
-        console.error('Failed to fetch user:', error)
-        // Token might be expired, try to refresh
-        await this.refreshTokens()
-      }
-    },
-
-    async refreshTokens() {
-      if (!this.refreshToken) {
-        this.logout()
-        return
-      }
-
-      try {
-        const config = useRuntimeConfig()
-        const response = await $fetch<{
-          accessToken: string
-          refreshToken: string
-        }>(`${config.public.apiBase}/auth/refresh`, {
-          method: 'POST',
-          body: {
-            refreshToken: this.refreshToken,
-            expiresInMins: 60
-          }
-        })
-
-        this.accessToken = response.accessToken
-        this.refreshToken = response.refreshToken
-
-        // Retry fetching user
-        await this.fetchUser()
-      } catch {
-        this.logout()
-      }
-    },
-
-    logout() {
       this.user = null
-      this.accessToken = null
-      this.refreshToken = null
+      this.token = null
       this.isAuthenticated = false
-      this.error = null
+      tokenCookie.value = null
 
-      // Redirect to login
-      navigateTo('/login')
+      return navigateTo('/login')
     },
 
-    clearError() {
+    async fetchUser(skipNavigation = false) {
+      this.loading = true
       this.error = null
-    }
+      const config = useRuntimeConfig()
+      const tokenCookie = useCookie('auth_token')
+
+      try {
+        const userData = await $fetch<AuthUser>('/auth/me', {
+          method: 'GET',
+          baseURL: config.public.apiBase as string,
+          headers: {
+            Authorization: `Bearer ${tokenCookie.value}`
+          }
+        })
+
+        this.user = userData
+        this.isAuthenticated = true
+
+        if (tokenCookie.value && !this.token) {
+          this.token = tokenCookie.value as string
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch user'
+        console.error('Fetch user error:', err)
+        this.user = null
+        this.token = null
+        this.isAuthenticated = false
+
+        if (!skipNavigation) {
+          await navigateTo('/login')
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async refreshToken() {
+      this.loading = true
+      this.error = null
+      const config = useRuntimeConfig()
+      const tokenCookie = useCookie('auth_token')
+
+      try {
+        if (!tokenCookie.value) {
+          throw new Error('No token available')
+        }
+
+        const response = await $fetch<RefreshTokenResponse>('/auth/refresh', {
+          method: 'POST',
+          body: { refreshToken: tokenCookie.value },
+          baseURL: config.public.apiBase as string
+        })
+
+        this.token = response.token
+        tokenCookie.value = response.token
+
+        return response.token
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to refresh token'
+        console.error('Refresh token error:', err)
+        this.user = null
+        this.token = null
+        this.isAuthenticated = false
+        await navigateTo('/login')
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    setUser(userData: AuthUser) {
+      this.user = userData
+      this.isAuthenticated = true
+    },
+
+    async initializeAuth() {
+      const tokenCookie = useCookie('auth_token')
+
+      if (tokenCookie.value) {
+        this.token = tokenCookie.value as string
+
+        await this.fetchUser(true)
+
+        if (!this.user) {
+          console.warn('Token validation failed during initialization')
+          tokenCookie.value = null
+          this.token = null
+          this.isAuthenticated = false
+        }
+      }
+    },
   },
 
-  persist: {
-    key: 'auth',
-    pick: ['accessToken', 'refreshToken', 'isAuthenticated', 'user']
-  }
+  persist: true,
 })

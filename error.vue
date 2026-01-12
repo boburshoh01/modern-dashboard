@@ -1,111 +1,191 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-    <div class="text-center max-w-md">
-      <!-- Error Icon -->
-      <div
-        class="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
-        :class="errorIconBg"
+  <div
+    class="min-h-screen bg-[#4880ff] relative flex items-center justify-center p-4 overflow-hidden"
+  >
+    <!-- Wavy Background Pattern -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+      <svg
+        class="w-full h-full"
+        viewBox="0 0 1440 1024"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <span class="text-5xl font-bold" :class="errorIconColor">
-          {{ errorCode }}
-        </span>
+        <path d="M0 0H1440V1024H0V0Z" fill="url(#paint0_linear)" />
+        <path
+          d="M1440 256C1300 256 1200 128 1000 128C800 128 700 256 500 256C300 256 200 128 0 128V1024H1440V256Z"
+          fill="white"
+          fill-opacity="0.1"
+        />
+        <path
+          d="M1440 400C1300 400 1200 272 1000 272C800 272 700 400 500 400C300 400 200 272 0 272V1024H1440V400Z"
+          fill="white"
+          fill-opacity="0.05"
+        />
+        <defs>
+          <linearGradient
+            id="paint0_linear"
+            x1="720"
+            y1="0"
+            x2="720"
+            y2="1024"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="white" stop-opacity="0" />
+            <stop offset="1" stop-color="white" stop-opacity="0.1" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <div
+      class="bg-white rounded-[24px] shadow-2xl w-full max-w-[630px] p-12 relative z-10 flex flex-col items-center text-center"
+    >
+      <!-- 404 Illustration -->
+      <div class="w-full max-w-[400px] mb-8">
+        <svg
+          viewBox="0 0 440 280"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-full h-auto"
+        >
+          <!-- Browser Frame -->
+          <rect x="0" y="0" width="440" height="280" rx="20" fill="#EAF2FF" />
+          <!-- Browser Header -->
+          <path
+            d="M0 20C0 8.95431 8.95431 0 20 0H420C431.046 0 440 8.95431 440 20V54H0V20Z"
+            fill="#D0E2FF"
+          />
+          <!-- Header Dots -->
+          <circle cx="34" cy="27" r="6" fill="#FF5F56" />
+          <circle cx="56" cy="27" r="6" fill="#FFBD2E" />
+          <circle cx="78" cy="27" r="6" fill="#27C93F" />
+          <!-- Search Bar -->
+          <rect
+            x="110"
+            y="17"
+            width="80"
+            height="20"
+            rx="10"
+            fill="white"
+            fill-opacity="0.5"
+          />
+
+          <!-- Browser Body Content (Blue Panel) -->
+          <rect x="0" y="54" width="440" height="226" rx="0" fill="#4880FF" />
+          <path
+            d="M0 54H440V260C440 271.046 431.046 280 420 280H20C8.9543 280 0 271.046 0 260V54Z"
+            fill="#4880FF"
+          />
+
+          <!-- Large 404 Text - Stylized as in Figma -->
+          <g transform="translate(60, 80)">
+            <!-- 4 -->
+            <path
+              d="M30 0L0 50V70H30V90H50V70H65V50H50V0H30ZM30 50H20L30 35V50Z"
+              fill="#FFB800"
+              transform="scale(1.5)"
+            />
+            <!-- 0 -->
+            <path
+              d="M100 0C85 0 75 15 75 45C75 75 85 90 100 90C115 90 125 75 125 45C125 15 115 0 100 0ZM100 70C95 70 93 60 93 45C93 30 95 20 100 20C105 20 107 30 107 45C107 60 105 70 100 70Z"
+              fill="#FFB800"
+              transform="scale(1.5) translate(-15, 0)"
+            />
+            <!-- 4 -->
+            <path
+              d="M170 0L140 50V70H170V90H190V70H205V50H190V0H170ZM170 50H160L170 35V50Z"
+              fill="#FFB800"
+              transform="scale(1.5) translate(-30, 0)"
+            />
+          </g>
+
+          <!-- Bottom Accents -->
+          <rect
+            x="50"
+            y="210"
+            width="30"
+            height="8"
+            rx="4"
+            fill="white"
+            fill-opacity="0.8"
+          />
+          <rect
+            x="50"
+            y="230"
+            width="60"
+            height="8"
+            rx="4"
+            fill="white"
+            fill-opacity="0.8"
+          />
+
+          <circle cx="350" cy="240" r="4" fill="white" fill-opacity="0.8" />
+          <circle cx="370" cy="240" r="4" fill="white" fill-opacity="0.8" />
+          <circle cx="390" cy="240" r="4" fill="white" fill-opacity="0.8" />
+        </svg>
       </div>
 
-      <!-- Error Title -->
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <h2 class="text-2xl font-bold text-[#202224] mb-8">
         {{ errorTitle }}
-      </h1>
+      </h2>
 
-      <!-- Error Description -->
-      <p class="text-gray-500 dark:text-gray-400 mb-8">
-        {{ errorDescription }}
+      <p
+        v-if="error.statusCode !== 404"
+        class="text-gray-500 mb-8 max-w-[400px]"
+      >
+        {{ errorMessage }}
       </p>
 
-      <!-- Actions -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a-button type="primary" size="large" @click="goHome">
-          {{ $t('errors.goHome') }}
+      <div class="w-full max-w-[340px]">
+        <a-button
+          type="primary"
+          block
+          size="large"
+          class="h-[60px] rounded-[12px] bg-[#4880ff] border-none text-lg font-bold shadow-lg shadow-blue-500/30 hover:bg-[#3d70eb] transition-all"
+          @click="handleError"
+        >
+          Back to Dashboard
         </a-button>
-        <a-button size="large" @click="goBack">
-          {{ $t('common.back') }}
-        </a-button>
-      </div>
-
-      <!-- Error Details (Dev Mode) -->
-      <div v-if="isDev && error?.message" class="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left">
-        <p class="text-sm text-gray-600 dark:text-gray-400 font-mono">
-          {{ error.message }}
-        </p>
-        <pre v-if="error.stack" class="mt-2 text-xs text-gray-500 overflow-auto">{{ error.stack }}</pre>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { NuxtError } from '#app'
-
-interface Props {
-  error: NuxtError
-}
-
-const props = defineProps<Props>()
-const { t } = useI18n()
-
-const isDev = process.dev
-
-const errorCode = computed(() => {
-  return props.error?.statusCode || 500
-})
+const props = defineProps({
+  error: {
+    type: Object,
+    required: true,
+  },
+});
 
 const errorTitle = computed(() => {
-  const titles: Record<number, string> = {
-    400: 'Bad Request',
-    401: 'Unauthorized',
-    403: t('errors.403.title'),
-    404: t('errors.404.title'),
-    500: t('errors.500.title')
-  }
-  return titles[errorCode.value] || t('errors.500.title')
-})
+  if (props.error.statusCode === 404) return "Looks like you've got lost....";
+  if (props.error.statusCode === 403) return "Access Denied";
+  return "Something Went Wrong";
+});
 
-const errorDescription = computed(() => {
-  const descriptions: Record<number, string> = {
-    400: 'The request could not be understood by the server.',
-    401: 'You need to be logged in to access this page.',
-    403: t('errors.403.description'),
-    404: t('errors.404.description'),
-    500: t('errors.500.description')
+const errorMessage = computed(() => {
+  if (props.error.statusCode === 404) {
+    return "Oops! The page you're looking for doesn't exist. It might have been moved or deleted.";
   }
-  return descriptions[errorCode.value] || t('errors.500.description')
-})
+  if (props.error.statusCode === 403) {
+    return "Sorry, you don't have permission to access this page. Please contact your administrator.";
+  }
+  return "An unexpected error occurred. Our team has been notified and is working on a fix.";
+});
 
-const errorIconBg = computed(() => {
-  if (errorCode.value === 404) {
-    return 'bg-warning-100 dark:bg-warning-900/30'
-  }
-  if (errorCode.value === 403) {
-    return 'bg-error-100 dark:bg-error-900/30'
-  }
-  return 'bg-error-100 dark:bg-error-900/30'
-})
-
-const errorIconColor = computed(() => {
-  if (errorCode.value === 404) {
-    return 'text-warning-500'
-  }
-  return 'text-error-500'
-})
-
-const goHome = () => {
-  clearError({ redirect: '/' })
-}
-
-const goBack = () => {
-  if (window.history.length > 1) {
-    window.history.back()
-  } else {
-    clearError({ redirect: '/' })
-  }
-}
+const handleError = () => clearError({ redirect: "/dashboard" });
 </script>
+
+<style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap");
+
+:deep(.ant-btn-primary) {
+  background-color: #4880ff !important;
+}
+
+:deep(.ant-btn-primary:hover) {
+  background-color: #3d70eb !important;
+}
+</style>

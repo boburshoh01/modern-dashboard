@@ -1,19 +1,21 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const authStore = useAuthStore()
+export default defineNuxtRouteMiddleware(async (_to, _from) => {
+  try {
+    const token = useCookie('auth_token')
 
-  // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/register', '/forgot-password']
+    if (!token.value) {
+      return navigateTo('/login')
+    }
 
-  // Check if the route is public
-  const isPublicRoute = publicRoutes.includes(to.path)
+    const authStore = useAuthStore()
+    if (!authStore.isAuthenticated && token.value) {
+      await authStore.initializeAuth()
+    }
 
-  // If user is not authenticated and trying to access protected route
-  if (!authStore.isLoggedIn && !isPublicRoute) {
+    if (!authStore.isAuthenticated) {
+      return navigateTo('/login')
+    }
+  } catch (error) {
+    console.error('Auth middleware error:', error)
     return navigateTo('/login')
-  }
-
-  // If user is authenticated and trying to access auth pages
-  if (authStore.isLoggedIn && isPublicRoute) {
-    return navigateTo('/')
   }
 })

@@ -1,54 +1,62 @@
-import type { UseFetchOptions } from 'nuxt/app'
+import axios from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 
-export function useApi<T>(
-  url: string | (() => string),
-  options: UseFetchOptions<T> = {}
-) {
+export const useApi = () => {
   const config = useRuntimeConfig()
-  const authStore = useAuthStore()
+  const tokenCookie = useCookie('auth_token')
 
-  const defaults: UseFetchOptions<T> = {
-    baseURL: config.public.apiBase,
-    key: typeof url === 'string' ? url : undefined,
-
-    onRequest({ options: reqOptions }) {
-      // Add auth token if available
-      if (authStore.accessToken) {
-        reqOptions.headers = {
-          ...reqOptions.headers,
-          Authorization: `Bearer ${authStore.accessToken}`
-        }
-      }
+  const instance = axios.create({
+    baseURL: config.public.apiBase as string,
+    headers: {
+      'Content-Type': 'application/json',
     },
+  })
 
-    onResponseError({ response }) {
-      // Handle 401 unauthorized
-      if (response.status === 401) {
-        authStore.logout()
+  instance.interceptors.request.use(
+    (config) => {
+      if (tokenCookie.value) {
+        config.headers.Authorization = `Bearer ${tokenCookie.value}`
       }
+      return config
+    },
+    (error) => {
+      console.error('Request error:', error)
+      return Promise.reject(error)
     }
+  )
+
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        tokenCookie.value = null
+        navigateTo('/login')
+      }
+      return Promise.reject(error)
+    }
+  )
+
+  const get = <T>(url: string, config?: AxiosRequestConfig) => {
+    return instance.get<T>(url, config)
   }
 
-  // Merge options
-  const mergedOptions = {
-    ...defaults,
-    ...options,
-    onRequest: (context: Parameters<NonNullable<UseFetchOptions<T>['onRequest']>>[0]) => {
-      defaults.onRequest?.(context)
-      options.onRequest?.(context)
-    },
-    onResponseError: (context: Parameters<NonNullable<UseFetchOptions<T>['onResponseError']>>[0]) => {
-      defaults.onResponseError?.(context)
-      options.onResponseError?.(context)
-    }
+  const post = <T>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    return instance.post<T>(url, data, config)
   }
 
-  return useFetch(url, mergedOptions as UseFetchOptions<T>)
-}
+  const put = <T>(url: string, data?: any, config?: AxiosRequestConfig) => {
+    return instance.put<T>(url, data, config)
+  }
 
-export function useApiLazy<T>(
-  url: string | (() => string),
-  options: UseFetchOptions<T> = {}
-) {
-  return useApi<T>(url, { ...options, lazy: true })
+  const del = <T>(url: string, config?: AxiosRequestConfig) => {
+    return instance.delete<T>(url, config)
+  }
+
+  return {
+    api: instance,
+    get,
+    post,
+    put,
+    delete: del,
+  }
 }

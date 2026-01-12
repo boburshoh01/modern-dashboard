@@ -7,41 +7,33 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
-    "@nuxtjs/i18n": "^9.5.5",
-    "@pinia/nuxt": "^0.10.1",
-    "@vueuse/core": "^12.8.2",
-    "@vueuse/nuxt": "^12.8.2",
-    "ant-design-vue": "^4.3.1",
-    "axios": "^1.9.0",
-    "chart.js": "^4.5.0",
-    "dayjs": "^1.12.1",
+    "@nuxt/eslint": "1.12.1",
+    "@nuxtjs/i18n": "^10.2.1",
+    "@pinia/nuxt": "^0.11.3",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.13.2",
+    "chart.js": "^4.5.1",
+    "eslint": "^9.39.2",
     "nuxt": "^3.20.2",
-    "pinia": "^3.0.3",
-    "pinia-plugin-persistedstate": "^4.3.0",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "^3.5.26",
-    "vue-chartjs": "^5.4.0",
-    "vue-router": "^4.6.4",
-    "xlsx": "^0.18.5"
+    "vue-chartjs": "^5.3.3",
+    "vue-router": "^4.6.4"
   },
+  "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a",
   "devDependencies": {
-    "@iconify-json/mdi": "^1.2.4",
-    "@nuxt/devtools": "latest",
-    "@nuxt/eslint": "^1.12.1",
+    "@nuxtjs/color-mode": "^4.0.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
-    "@types/node": "^22.15.29",
+    "@types/node": "^25.0.3",
     "autoprefixer": "^10.4.23",
-    "eslint": "^9.28.0",
     "postcss": "^8.5.6",
-    "sass": "^1.91.0",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3",
-    "unplugin-icons": "^22.1.0"
-  },
-  "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a"
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.2"
+  }
 }
