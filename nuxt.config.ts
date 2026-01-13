@@ -55,8 +55,10 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: 'vercel',
     compressPublicAssets: true,
-    minify: true
+    minify: true,
+    logLevel: 4
   },
 
   typescript: {
