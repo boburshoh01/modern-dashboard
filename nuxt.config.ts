@@ -35,6 +35,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  vite: {
+    ssr: {
+      noExternal: ['ant-design-vue']
+    }
+  },
+
   typescript: {
     strict: true,
     typeCheck: false

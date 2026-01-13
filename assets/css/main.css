@@ -3,17 +3,30 @@
 @tailwind utilities;
 
 /* Custom global styles */
-body {
-  @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-dark-text-primary transition-colors duration-300;
-  font-family: "Nunito Sans", sans-serif;
+@layer base {
+  body {
+    @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-dark-text-primary transition-colors duration-300;
+    font-family: "Nunito Sans", sans-serif;
+  }
+
+  * {
+    font-family: "Nunito Sans", sans-serif;
+  }
 }
 
 /* Ant Design customization */
-:root {
-  --primary-color: #4880ff;
-}
+@layer components {
+  :root {
+    --ant-primary-color: #4880ff;
+    --ant-primary-color-hover: #3a6fcc;
+    --ant-primary-color-active: #2c5ab3;
+  }
 
-/* Nunito Sans font family */
-* {
-  font-family: "Nunito Sans", sans-serif;
+  /* Ensure Ant Design components inherit font */
+  .ant-btn,
+  .ant-input,
+  .ant-select,
+  .ant-form-item-label > label {
+    font-family: "Nunito Sans", sans-serif;
+  }
 }
