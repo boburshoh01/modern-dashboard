@@ -1,11 +1,14 @@
+<template>
+  <div></div>
+</template>
 <script setup lang="ts">
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
-authStore.initializeAuth()
+authStore.initializeAuth();
 
 if (authStore.isAuthenticated && authStore.token) {
-  await navigateTo('/dashboard', { replace: true })
+  await navigateTo("/dashboard", { replace: true });
 } else {
-  await navigateTo('/login', { replace: true })
+  await navigateTo("/login", { replace: true });
 }
 </script>

@@ -1,4 +1,3 @@
-// User types
 export interface User {
   id: number
   firstName: string
@@ -38,7 +37,7 @@ export interface User {
   ssn: string
   userAgent: string
   role: 'admin' | 'moderator' | 'user'
-  status?: 'active' | 'inactive' | 'suspended' // Added status as per requirements
+  status?: 'active' | 'inactive' | 'suspended'
 }
 
 export interface UserResponse {
@@ -48,7 +47,6 @@ export interface UserResponse {
   limit: number
 }
 
-// Product types
 export interface ProductDimensions {
   width: number
   height: number
@@ -102,7 +100,6 @@ export interface ProductResponse {
   limit: number
 }
 
-// Post types
 export interface Post {
   id: number
   title: string
@@ -119,7 +116,6 @@ export interface PostResponse {
   limit: number
 }
 
-// Auth types
 export interface LoginCredentials {
   username: string
   password: string
@@ -143,7 +139,6 @@ export interface RefreshTokenResponse {
   refreshToken: string
 }
 
-// API types
 export interface ApiResponse<T> {
   data: T
   message?: string
@@ -162,7 +157,6 @@ export interface Category {
   url: string
 }
 
-// Validation types
 export interface ValidationRule {
   required?: boolean
   message?: string
@@ -182,7 +176,6 @@ export interface FormState {
   [key: string]: any
 }
 
-// Store types
 export interface StoreState {
   loading: boolean
   error: string | null

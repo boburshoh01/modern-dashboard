@@ -2,7 +2,6 @@
   <div
     class="min-h-screen bg-[#4880ff] relative flex items-center justify-center p-4 overflow-hidden"
   >
-    <!-- Wavy Background Pattern -->
     <div class="absolute inset-0 opacity-10 pointer-events-none">
       <svg
         class="w-full h-full"
@@ -40,7 +39,6 @@
     <div
       class="bg-white rounded-[24px] shadow-2xl w-full max-w-[630px] p-12 relative z-10 flex flex-col items-center text-center"
     >
-      <!-- 404 Illustration -->
       <div class="w-full max-w-[400px] mb-8">
         <svg
           viewBox="0 0 440 280"
@@ -48,18 +46,14 @@
           xmlns="http://www.w3.org/2000/svg"
           class="w-full h-auto"
         >
-          <!-- Browser Frame -->
           <rect x="0" y="0" width="440" height="280" rx="20" fill="#EAF2FF" />
-          <!-- Browser Header -->
           <path
             d="M0 20C0 8.95431 8.95431 0 20 0H420C431.046 0 440 8.95431 440 20V54H0V20Z"
             fill="#D0E2FF"
           />
-          <!-- Header Dots -->
           <circle cx="34" cy="27" r="6" fill="#FF5F56" />
           <circle cx="56" cy="27" r="6" fill="#FFBD2E" />
           <circle cx="78" cy="27" r="6" fill="#27C93F" />
-          <!-- Search Bar -->
           <rect
             x="110"
             y="17"
@@ -70,28 +64,23 @@
             fill-opacity="0.5"
           />
 
-          <!-- Browser Body Content (Blue Panel) -->
           <rect x="0" y="54" width="440" height="226" rx="0" fill="#4880FF" />
           <path
             d="M0 54H440V260C440 271.046 431.046 280 420 280H20C8.9543 280 0 271.046 0 260V54Z"
             fill="#4880FF"
           />
 
-          <!-- Large 404 Text - Stylized as in Figma -->
           <g transform="translate(60, 80)">
-            <!-- 4 -->
             <path
               d="M30 0L0 50V70H30V90H50V70H65V50H50V0H30ZM30 50H20L30 35V50Z"
               fill="#FFB800"
               transform="scale(1.5)"
             />
-            <!-- 0 -->
             <path
               d="M100 0C85 0 75 15 75 45C75 75 85 90 100 90C115 90 125 75 125 45C125 15 115 0 100 0ZM100 70C95 70 93 60 93 45C93 30 95 20 100 20C105 20 107 30 107 45C107 60 105 70 100 70Z"
               fill="#FFB800"
               transform="scale(1.5) translate(-15, 0)"
             />
-            <!-- 4 -->
             <path
               d="M170 0L140 50V70H170V90H190V70H205V50H190V0H170ZM170 50H160L170 35V50Z"
               fill="#FFB800"
@@ -99,7 +88,6 @@
             />
           </g>
 
-          <!-- Bottom Accents -->
           <rect
             x="50"
             y="210"

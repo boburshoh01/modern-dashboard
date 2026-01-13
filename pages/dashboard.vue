@@ -249,11 +249,9 @@ definePageMeta({
 const selectedMonth = ref("october");
 const selectedDealMonth = ref("october");
 
-// Use Dashboard Store
 const dashboardStore = useDashboardStore();
 const { stats, loading } = storeToRefs(dashboardStore);
 
-// Fetch Dashboard Statistics
 const fetchDashboardStats = async () => {
   try {
     await dashboardStore.fetchDashboardStats();
@@ -264,7 +262,6 @@ const fetchDashboardStats = async () => {
   }
 };
 
-// Chart Data
 const chartData = computed(() => ({
   labels: [
     "5k",

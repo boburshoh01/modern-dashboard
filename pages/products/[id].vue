@@ -41,7 +41,6 @@
               v-model:value="formState.category"
               :placeholder="$t('products.form.categoryPlaceholder')"
             >
-              <!-- Using store categories here -->
               <a-select-option
                 v-for="cat in productsStore.categories"
                 :key="cat.slug || cat"

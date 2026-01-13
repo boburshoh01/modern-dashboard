@@ -254,7 +254,6 @@ const handleSearch = () => {
   fetchUsers();
 };
 
-// Watch filters to fetch automatically
 watch(
   () => [filters.key, filters.value],
   () => {
