@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+  @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-dark-text-primary transition-colors duration-300;
+  font-family: "Nunito Sans", sans-serif;
+}
+
+/* Ant Design customization */
+:root {
+  --primary-color: #4880ff;
+}
+
+/* Nunito Sans font family */
+* {
+  font-family: "Nunito Sans", sans-serif;
+}
