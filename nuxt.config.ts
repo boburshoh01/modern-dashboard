@@ -33,12 +33,30 @@ export default defineNuxtConfig({
     storageKey: 'nuxt-color-mode'
   },
 
-  css: ['~/assets/css/main.css'],
+  css: [
+    'ant-design-vue/dist/reset.css',
+    '~/assets/css/main.css'
+  ],
 
   vite: {
     ssr: {
       noExternal: ['ant-design-vue']
+    },
+    build: {
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'ant-design': ['ant-design-vue']
+          }
+        }
+      }
     }
+  },
+
+  nitro: {
+    compressPublicAssets: true,
+    minify: true
   },
 
   typescript: {
@@ -65,8 +83,20 @@ export default defineNuxtConfig({
           crossorigin: ''
         },
         {
-          rel: 'stylesheet',
+          rel: 'preload',
+          as: 'style',
           href: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap'
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap',
+          media: 'print',
+          onload: "this.media='all'"
+        }
+      ],
+      noscript: [
+        {
+          innerHTML: '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap">'
         }
       ]
     }
