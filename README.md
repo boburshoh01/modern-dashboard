@@ -15,6 +15,7 @@ Zamonaviy admin panel - Frontend Developer Assessment uchun yaratilgan.
 ## O'rnatilgan Paketlar
 
 ### Dependencies
+
 - `nuxt` - Nuxt 3 framework
 - `vue` - Vue 3
 - `ant-design-vue` - UI components
@@ -25,6 +26,7 @@ Zamonaviy admin panel - Frontend Developer Assessment uchun yaratilgan.
 - `axios` - HTTP client
 
 ### Dev Dependencies
+
 - `@nuxtjs/tailwindcss` - Tailwind CSS module
 - `tailwindcss` - CSS framework
 - `typescript` - TypeScript compiler
@@ -64,21 +66,25 @@ moderndashboard/
 ## Ishga Tushirish
 
 1. Dependencies o'rnatish:
+
 ```bash
 pnpm install
 ```
 
 2. Development server:
+
 ```bash
 pnpm dev
 ```
 
 3. Production build:
+
 ```bash
 pnpm build
 ```
 
 4. Preview production build:
+
 ```bash
 pnpm preview
 ```
@@ -86,6 +92,7 @@ pnpm preview
 ## Xususiyatlar
 
 ### 1. API Client (useApi)
+
 ```typescript
 const { get, post, put, delete } = useApi()
 
@@ -97,116 +104,124 @@ const newUser = await post('/users/add', userData)
 ```
 
 ### 2. Notification System (useNotification)
-```typescript
-const { success, error, warning, info } = useNotification()
 
-success('Muvaffaqiyatli!', 'Ma\'lumot saqlandi')
-error('Xatolik!', 'Nimadir xato ketdi')
+```typescript
+const { success, error, warning, info } = useNotification();
+
+success("Muvaffaqiyatli!", "Ma'lumot saqlandi");
+error("Xatolik!", "Nimadir xato ketdi");
 ```
 
 ### 3. Pinia Stores (with Persistence)
 
 #### Auth Store
+
 ```typescript
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 
 // Login
-await authStore.login({ username, password })
+await authStore.login({ username, password });
 
 // Logout
-await authStore.logout()
+await authStore.logout();
 
 // Get current user
-const user = authStore.currentUser
+const user = authStore.currentUser;
 
 // Check loading/error state
-const { loading, error } = authStore
+const { loading, error } = authStore;
 ```
 
 #### Theme Store
+
 ```typescript
-const themeStore = useThemeStore()
+const themeStore = useThemeStore();
 
 // Toggle between light/dark/system
-themeStore.toggleTheme()
+themeStore.toggleTheme();
 
 // Set specific mode
-themeStore.setMode('dark') // 'light' | 'dark' | 'system'
+themeStore.setMode("dark"); // 'light' | 'dark' | 'system'
 
 // Initialize theme (call in app setup)
-themeStore.initTheme()
+themeStore.initTheme();
 
 // Get current state
-const isDark = themeStore.isDarkMode
+const isDark = themeStore.isDarkMode;
 ```
 
 #### Locale Store
+
 ```typescript
-const localeStore = useLocaleStore()
+const localeStore = useLocaleStore();
 
 // Set language
-localeStore.setLocale('uz') // 'en' | 'uz' | 'ru'
+localeStore.setLocale("uz"); // 'en' | 'uz' | 'ru'
 
 // Get current locale
-const currentLang = localeStore.currentLocale
+const currentLang = localeStore.currentLocale;
 
 // Get available locales
-const locales = localeStore.availableLocales
+const locales = localeStore.availableLocales;
 ```
 
 #### Products Store
+
 ```typescript
-const productsStore = useProductsStore()
+const productsStore = useProductsStore();
 
 // Fetch products
-await productsStore.fetchProducts({ limit: 10, skip: 0 })
+await productsStore.fetchProducts({ limit: 10, skip: 0 });
 
 // Search products
-await productsStore.fetchProducts({ q: 'phone' })
+await productsStore.fetchProducts({ q: "phone" });
 
 // Filter by category
-await productsStore.fetchProducts({ category: 'smartphones' })
+await productsStore.fetchProducts({ category: "smartphones" });
 
 // CRUD operations
-await productsStore.addProduct(productData)
-await productsStore.updateProduct(id, updates)
-await productsStore.deleteProduct(id)
+await productsStore.addProduct(productData);
+await productsStore.updateProduct(id, updates);
+await productsStore.deleteProduct(id);
 
 // Check state
-const { products, loading, error } = productsStore
+const { products, loading, error } = productsStore;
 ```
 
 #### Users Store
+
 ```typescript
-const usersStore = useUsersStore()
+const usersStore = useUsersStore();
 
 // Fetch users
-await usersStore.fetchUsers({ limit: 10, skip: 0 })
+await usersStore.fetchUsers({ limit: 10, skip: 0 });
 
 // Search users
-await usersStore.fetchUsers({ search: 'John' })
+await usersStore.fetchUsers({ search: "John" });
 
 // CRUD operations
-await usersStore.addUser(userData)
-await usersStore.updateUser(id, updates)
-await usersStore.deleteUser(id)
+await usersStore.addUser(userData);
+await usersStore.updateUser(id, updates);
+await usersStore.deleteUser(id);
 ```
 
 #### Dashboard Store
+
 ```typescript
-const dashboardStore = useDashboardStore()
+const dashboardStore = useDashboardStore();
 
 // Fetch dashboard statistics
-await dashboardStore.fetchDashboardStats()
+await dashboardStore.fetchDashboardStats();
 
 // Access stats
-const { totalUsers, totalOrders, totalSales, totalPending } = dashboardStore.stats
+const { totalUsers, totalOrders, totalSales, totalPending } =
+  dashboardStore.stats;
 
 // Check loading state
-const isLoading = dashboardStore.loading
+const isLoading = dashboardStore.loading;
 
 // Reset stats
-dashboardStore.resetStats()
+dashboardStore.resetStats();
 ```
 
 ### 4. Form Validation (useValidation)
@@ -224,29 +239,30 @@ const {
   username,
   loginRules,
   userFormRules,
-  productFormRules
-} = useValidation()
+  productFormRules,
+} = useValidation();
 
 // Using predefined rule sets
 const rules = {
   username: loginRules.username,
   password: loginRules.password,
-}
+};
 
 // Custom validation
 const customRules = {
-  firstName: [required('First Name'), minLength(2), maxLength(50)],
-  email: [required('Email'), email()],
+  firstName: [required("First Name"), minLength(2), maxLength(50)],
+  email: [required("Email"), email()],
   phone: [phone()],
-  username: [required('Username'), username()],
-}
+  username: [required("Username"), username()],
+};
 
 // Real-time validation
-await validateField(formRef, 'username')
-await validateForm(formRef)
+await validateField(formRef, "username");
+await validateForm(formRef);
 ```
 
 #### Available Validators:
+
 - `required(field, message?)` - Required field
 - `email(message?)` - Email format
 - `phone(message?)` - Phone format (international)
@@ -267,6 +283,7 @@ await validateForm(formRef)
 - `custom(validator)` - Custom validator function
 
 #### Predefined Rule Sets:
+
 - `loginRules` - Username and password rules
 - `registerRules` - Registration form rules
 - `userFormRules` - User form validation
@@ -279,15 +296,15 @@ All validation messages support i18n (EN, UZ, RU).
 Barcha komponentlar va funksiyalar TypeScript bilan yozilgan va type-safe.
 
 ```typescript
-import type { User, Product, ValidationRule } from '~/types'
+import type { User, Product, ValidationRule } from "~/types";
 
 const user: User = {
   id: 1,
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john@example.com',
-  username: 'johndoe'
-}
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  username: "johndoe",
+};
 ```
 
 ## API Endpoints (DummyJSON)
@@ -300,6 +317,7 @@ const user: User = {
 ## Bajarilgan Vazifalar
 
 ### State Management ✅
+
 - [x] Centralized state management with Pinia
 - [x] Auth store with loading/error states
 - [x] Theme store (dark mode with persist)
@@ -310,6 +328,7 @@ const user: User = {
 - [x] Pinia persistence plugin configured
 
 ### Form Validation ✅
+
 - [x] Complete validation composable (useValidation)
 - [x] Required fields validation
 - [x] Email format validation
@@ -326,6 +345,7 @@ const user: User = {
 ## Implemented Features
 
 ### Pages
+
 - [x] Login page
 - [x] Dashboard page (with API integration)
 - [x] Products page (with CRUD)
@@ -335,6 +355,7 @@ const user: User = {
 - [x] User detail page
 
 ### Components
+
 - [x] AppBreadcrumbs - Navigation breadcrumbs
 - [x] AppEmpty - Empty state component
 - [x] AppLoading - Loading spinner
@@ -343,16 +364,19 @@ const user: User = {
 - [x] AppFormStyles - Form styling utilities
 
 ### Composables
+
 - [x] useApi - HTTP client wrapper
 - [x] useNotification - Notification system
 - [x] useValidation - Form validation
 - [x] useAppConfirm - Confirmation dialogs
 
 ### Middleware
+
 - [x] auth.ts - Protected routes
 - [x] guest.ts - Guest-only routes
 
 ### Localization
+
 - [x] i18n setup (EN, UZ, RU)
 - [x] Language switcher
 - [x] Validation messages in all languages
