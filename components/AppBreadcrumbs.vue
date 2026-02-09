@@ -1,3 +1,42 @@
+<script setup lang="ts">
+import { HomeOutlined, RightOutlined } from "@ant-design/icons-vue"
+
+const route = useRoute()
+const { t } = useI18n()
+
+const breadcrumbs = computed(() => {
+  const pathArray = route.path.split("/").filter(p => p)
+  const crumbs = pathArray.map((path, index) => {
+    const fullPath = `/${pathArray.slice(0, index + 1).join("/")}`
+
+    let label = path
+    if (path === "dashboard")
+      label = t("sidebar.dashboard")
+    else if (path === "users")
+      label = t("sidebar.users")
+    else if (path === "products")
+      label = t("sidebar.products")
+    else if (path === "favorites")
+      label = t("sidebar.favorites")
+    else if (path === "add")
+      label = t("common.add", "Add")
+    else if (path === "edit")
+      label = t("common.edit", "Edit")
+
+    return {
+      label,
+      path: fullPath,
+    }
+  })
+
+  if (pathArray[0] === "dashboard" && pathArray.length === 1) {
+    return []
+  }
+
+  return crumbs
+})
+</script>
+
 <template>
   <nav class="flex text-sm font-semibold mb-4" aria-label="Breadcrumb">
     <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -31,36 +70,3 @@
     </ol>
   </nav>
 </template>
-
-<script setup lang="ts">
-import { HomeOutlined, RightOutlined } from "@ant-design/icons-vue";
-
-const route = useRoute();
-const { t } = useI18n();
-
-const breadcrumbs = computed(() => {
-  const pathArray = route.path.split("/").filter((p) => p);
-  const crumbs = pathArray.map((path, index) => {
-    const fullPath = `/${pathArray.slice(0, index + 1).join("/")}`;
-
-    let label = path;
-    if (path === "dashboard") label = t("sidebar.dashboard");
-    else if (path === "users") label = t("sidebar.users");
-    else if (path === "products") label = t("sidebar.products");
-    else if (path === "favorites") label = t("sidebar.favorites");
-    else if (path === "add") label = t("common.add", "Add");
-    else if (path === "edit") label = t("common.edit", "Edit");
-
-    return {
-      label,
-      path: fullPath,
-    };
-  });
-
-  if (pathArray[0] === "dashboard" && pathArray.length === 1) {
-    return [];
-  }
-
-  return crumbs;
-});
-</script>

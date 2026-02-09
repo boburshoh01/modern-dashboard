@@ -106,10 +106,10 @@ const newUser = await post('/users/add', userData)
 ### 2. Notification System (useNotification)
 
 ```typescript
-const { success, error, warning, info } = useNotification();
+const { success, error, warning, info } = useNotification()
 
-success("Muvaffaqiyatli!", "Ma'lumot saqlandi");
-error("Xatolik!", "Nimadir xato ketdi");
+success("Muvaffaqiyatli!", "Ma'lumot saqlandi")
+error("Xatolik!", "Nimadir xato ketdi")
 ```
 
 ### 3. Pinia Stores (with Persistence)
@@ -117,111 +117,111 @@ error("Xatolik!", "Nimadir xato ketdi");
 #### Auth Store
 
 ```typescript
-const authStore = useAuthStore();
+const authStore = useAuthStore()
 
 // Login
-await authStore.login({ username, password });
+await authStore.login({ username, password })
 
 // Logout
-await authStore.logout();
+await authStore.logout()
 
 // Get current user
-const user = authStore.currentUser;
+const user = authStore.currentUser
 
 // Check loading/error state
-const { loading, error } = authStore;
+const { loading, error } = authStore
 ```
 
 #### Theme Store
 
 ```typescript
-const themeStore = useThemeStore();
+const themeStore = useThemeStore()
 
 // Toggle between light/dark/system
-themeStore.toggleTheme();
+themeStore.toggleTheme()
 
 // Set specific mode
-themeStore.setMode("dark"); // 'light' | 'dark' | 'system'
+themeStore.setMode("dark") // 'light' | 'dark' | 'system'
 
 // Initialize theme (call in app setup)
-themeStore.initTheme();
+themeStore.initTheme()
 
 // Get current state
-const isDark = themeStore.isDarkMode;
+const isDark = themeStore.isDarkMode
 ```
 
 #### Locale Store
 
 ```typescript
-const localeStore = useLocaleStore();
+const localeStore = useLocaleStore()
 
 // Set language
-localeStore.setLocale("uz"); // 'en' | 'uz' | 'ru'
+localeStore.setLocale("uz") // 'en' | 'uz' | 'ru'
 
 // Get current locale
-const currentLang = localeStore.currentLocale;
+const currentLang = localeStore.currentLocale
 
 // Get available locales
-const locales = localeStore.availableLocales;
+const locales = localeStore.availableLocales
 ```
 
 #### Products Store
 
 ```typescript
-const productsStore = useProductsStore();
+const productsStore = useProductsStore()
 
 // Fetch products
-await productsStore.fetchProducts({ limit: 10, skip: 0 });
+await productsStore.fetchProducts({ limit: 10, skip: 0 })
 
 // Search products
-await productsStore.fetchProducts({ q: "phone" });
+await productsStore.fetchProducts({ q: "phone" })
 
 // Filter by category
-await productsStore.fetchProducts({ category: "smartphones" });
+await productsStore.fetchProducts({ category: "smartphones" })
 
 // CRUD operations
-await productsStore.addProduct(productData);
-await productsStore.updateProduct(id, updates);
-await productsStore.deleteProduct(id);
+await productsStore.addProduct(productData)
+await productsStore.updateProduct(id, updates)
+await productsStore.deleteProduct(id)
 
 // Check state
-const { products, loading, error } = productsStore;
+const { products, loading, error } = productsStore
 ```
 
 #### Users Store
 
 ```typescript
-const usersStore = useUsersStore();
+const usersStore = useUsersStore()
 
 // Fetch users
-await usersStore.fetchUsers({ limit: 10, skip: 0 });
+await usersStore.fetchUsers({ limit: 10, skip: 0 })
 
 // Search users
-await usersStore.fetchUsers({ search: "John" });
+await usersStore.fetchUsers({ search: "John" })
 
 // CRUD operations
-await usersStore.addUser(userData);
-await usersStore.updateUser(id, updates);
-await usersStore.deleteUser(id);
+await usersStore.addUser(userData)
+await usersStore.updateUser(id, updates)
+await usersStore.deleteUser(id)
 ```
 
 #### Dashboard Store
 
 ```typescript
-const dashboardStore = useDashboardStore();
+const dashboardStore = useDashboardStore()
 
 // Fetch dashboard statistics
-await dashboardStore.fetchDashboardStats();
+await dashboardStore.fetchDashboardStats()
 
 // Access stats
-const { totalUsers, totalOrders, totalSales, totalPending } =
-  dashboardStore.stats;
+const { totalUsers, totalOrders, totalSales, totalPending }
+  = dashboardStore.stats
 
 // Check loading state
-const isLoading = dashboardStore.loading;
+const isLoading = dashboardStore.loading
 
 // Reset stats
-dashboardStore.resetStats();
+dashboardStore.resetStats()
 ```
 
 ### 4. Form Validation (useValidation)
@@ -240,13 +240,13 @@ const {
   loginRules,
   userFormRules,
   productFormRules,
-} = useValidation();
+} = useValidation()
 
 // Using predefined rule sets
 const rules = {
   username: loginRules.username,
   password: loginRules.password,
-};
+}
 
 // Custom validation
 const customRules = {
@@ -254,11 +254,11 @@ const customRules = {
   email: [required("Email"), email()],
   phone: [phone()],
   username: [required("Username"), username()],
-};
+}
 
 // Real-time validation
-await validateField(formRef, "username");
-await validateForm(formRef);
+await validateField(formRef, "username")
+await validateForm(formRef)
 ```
 
 #### Available Validators:
@@ -296,7 +296,7 @@ All validation messages support i18n (EN, UZ, RU).
 Barcha komponentlar va funksiyalar TypeScript bilan yozilgan va type-safe.
 
 ```typescript
-import type { User, Product, ValidationRule } from "~/types";
+import type { Product, User, ValidationRule } from "~/types"
 
 const user: User = {
   id: 1,
@@ -304,7 +304,7 @@ const user: User = {
   lastName: "Doe",
   email: "john@example.com",
   username: "johndoe",
-};
+}
 ```
 
 ## API Endpoints (DummyJSON)

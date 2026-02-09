@@ -1,11 +1,13 @@
-<template>
-  <div class="space-y-6">
-    <p class="text-xs text-gray-400">Use these patterns for consistent forms</p>
-  </div>
-</template>
-
 <script setup lang="ts">
 </script>
+
+<template>
+  <div class="space-y-6">
+    <p class="text-xs text-gray-400">
+      Use these patterns for consistent forms
+    </p>
+  </div>
+</template>
 
 <style>
 .ant-btn-primary {

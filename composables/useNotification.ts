@@ -1,11 +1,11 @@
-import { notification } from 'ant-design-vue'
+import { notification } from "ant-design-vue"
 
-export const useNotification = () => {
+export function useNotification() {
   const success = (message: string, description?: string) => {
     notification.success({
       message,
       description,
-      placement: 'topRight',
+      placement: "topRight",
     })
   }
 
@@ -13,7 +13,7 @@ export const useNotification = () => {
     notification.error({
       message,
       description,
-      placement: 'topRight',
+      placement: "topRight",
     })
   }
 
@@ -21,7 +21,7 @@ export const useNotification = () => {
     notification.warning({
       message,
       description,
-      placement: 'topRight',
+      placement: "topRight",
     })
   }
 
@@ -29,7 +29,7 @@ export const useNotification = () => {
     notification.info({
       message,
       description,
-      placement: 'topRight',
+      placement: "topRight",
     })
   }
 

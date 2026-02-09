@@ -4,7 +4,7 @@ export interface User {
   lastName: string
   maidenName?: string
   age: number
-  gender: 'male' | 'female' | 'other'
+  gender: "male" | "female" | "other"
   email: string
   phone: string
   username: string
@@ -36,8 +36,8 @@ export interface User {
   ein: string
   ssn: string
   userAgent: string
-  role: 'admin' | 'moderator' | 'user'
-  status?: 'active' | 'inactive' | 'suspended'
+  role: "admin" | "moderator" | "user"
+  status?: "active" | "inactive" | "suspended"
 }
 
 export interface UserResponse {
@@ -84,7 +84,7 @@ export interface Product {
   dimensions: ProductDimensions
   warrantyInformation: string
   shippingInformation: string
-  availabilityStatus: 'In Stock' | 'Low Stock' | 'Out of Stock'
+  availabilityStatus: "In Stock" | "Low Stock" | "Out of Stock"
   reviews?: ProductReview[]
   returnPolicy: string
   minimumOrderQuantity: number
@@ -160,7 +160,7 @@ export interface Category {
 export interface ValidationRule {
   required?: boolean
   message?: string
-  type?: 'string' | 'number' | 'email' | 'url' | 'phone'
+  type?: "string" | "number" | "email" | "url" | "phone"
   min?: number
   max?: number
   pattern?: RegExp
@@ -182,10 +182,10 @@ export interface StoreState {
 }
 
 export interface ThemeState {
-  mode: 'light' | 'dark' | 'system'
+  mode: "light" | "dark" | "system"
   isDark: boolean
 }
 
 export interface LocaleState {
-  currentLocale: 'en' | 'uz' | 'ru'
+  currentLocale: "en" | "uz" | "ru"
 }

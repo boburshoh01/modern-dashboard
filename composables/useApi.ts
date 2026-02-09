@@ -1,14 +1,14 @@
-import axios from 'axios'
-import type { AxiosRequestConfig } from 'axios'
+import type { AxiosRequestConfig } from "axios"
+import axios from "axios"
 
-export const useApi = () => {
+export function useApi() {
   const config = useRuntimeConfig()
-  const tokenCookie = useCookie('auth_token')
+  const tokenCookie = useCookie("auth_token")
 
   const instance = axios.create({
     baseURL: config.public.apiBase as string,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   })
 
@@ -20,20 +20,20 @@ export const useApi = () => {
       return config
     },
     (error) => {
-      console.error('Request error:', error)
+      console.error("Request error:", error)
       return Promise.reject(error)
-    }
+    },
   )
 
   instance.interceptors.response.use(
-    (response) => response,
+    response => response,
     (error) => {
       if (error.response?.status === 401) {
         tokenCookie.value = null
-        navigateTo('/login')
+        navigateTo("/login")
       }
       return Promise.reject(error)
-    }
+    },
   )
 
   const get = <T>(url: string, config?: AxiosRequestConfig) => {

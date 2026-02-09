@@ -1,9 +1,9 @@
 export default defineNuxtRouteMiddleware(async (_to, _from) => {
   try {
-    const token = useCookie('auth_token')
+    const token = useCookie("auth_token")
 
     if (!token.value) {
-      return navigateTo('/login')
+      return navigateTo("/login")
     }
 
     const authStore = useAuthStore()
@@ -12,10 +12,10 @@ export default defineNuxtRouteMiddleware(async (_to, _from) => {
     }
 
     if (!authStore.isAuthenticated) {
-      return navigateTo('/login')
+      return navigateTo("/login")
     }
   } catch (error) {
-    console.error('Auth middleware error:', error)
-    return navigateTo('/login')
+    console.error("Auth middleware error:", error)
+    return navigateTo("/login")
   }
 })

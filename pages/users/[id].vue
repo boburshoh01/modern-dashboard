@@ -1,3 +1,99 @@
+<script setup lang="ts">
+import type { User } from "~/types"
+import { LeftOutlined, UserOutlined } from "@ant-design/icons-vue"
+
+definePageMeta({
+  layout: "default",
+  middleware: "auth",
+})
+
+const route = useRoute()
+const router = useRouter()
+const usersStore = useUsersStore()
+const { success, error } = useNotification()
+
+const isEditMode = computed(() => route.params.id && route.params.id !== "add")
+const loading = ref(false)
+
+const formState = reactive({
+  id: 0,
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  username: "",
+  password: "",
+  hair: { color: "", type: "" },
+  address: {
+    address: "",
+    city: "",
+    state: "",
+    stateCode: "",
+    postalCode: "",
+    country: "",
+  },
+  company: { name: "", department: "", title: "" },
+  role: "user",
+  status: "active",
+} as unknown as User)
+
+onMounted(async () => {
+  if (isEditMode.value) {
+    const id = Number(route.params.id)
+    if (!Number.isNaN(id)) {
+      try {
+        const user = await usersStore.fetchUserById(id)
+        if (user) {
+          Object.assign(formState, user)
+          if (!formState.hair)
+            formState.hair = { color: "", type: "" }
+          if (!formState.address) {
+            formState.address = {
+              address: "",
+              city: "",
+              state: "",
+              stateCode: "",
+              postalCode: "",
+              country: "",
+            }
+          }
+          if (!formState.company)
+            formState.company = { name: "", department: "", title: "" }
+        }
+      } catch {
+        error("Error", "Failed to load user")
+        router.push("/users")
+      }
+    }
+  }
+})
+
+async function handleSubmit() {
+  try {
+    if (!formState.firstName || !formState.lastName || !formState.email) {
+      error("Validation Error", "Please fill in all required fields")
+      return
+    }
+
+    loading.value = true
+    if (isEditMode.value) {
+      await usersStore.updateUser(Number(route.params.id), formState)
+      success("Updated", "User updated successfully")
+      router.push("/users")
+    } else {
+      await usersStore.addUser(formState)
+      success("Created", "User created successfully")
+      router.push("/users")
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to save user"
+    error("Error", message)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
@@ -92,15 +188,21 @@
             </a-form-item>
             <a-form-item :label="$t('users.form.gender')" required>
               <a-select v-model:value="formState.gender">
-                <a-select-option value="male">{{
-                  $t("users.genders.male")
-                }}</a-select-option>
-                <a-select-option value="female">{{
-                  $t("users.genders.female")
-                }}</a-select-option>
-                <a-select-option value="other">{{
-                  $t("users.genders.other")
-                }}</a-select-option>
+                <a-select-option value="male">
+                  {{
+                    $t("users.genders.male")
+                  }}
+                </a-select-option>
+                <a-select-option value="female">
+                  {{
+                    $t("users.genders.female")
+                  }}
+                </a-select-option>
+                <a-select-option value="other">
+                  {{
+                    $t("users.genders.other")
+                  }}
+                </a-select-option>
               </a-select>
             </a-form-item>
           </div>
@@ -141,8 +243,9 @@
                   ]"
                   :key="g"
                   :value="g"
-                  >{{ g }}</a-select-option
                 >
+                  {{ g }}
+                </a-select-option>
               </a-select>
             </a-form-item>
           </div>
@@ -156,18 +259,26 @@
           </div>
           <a-form-item :label="$t('users.form.hairType')">
             <a-select v-model:value="formState.hair.type">
-              <a-select-option value="Straight">{{
-                $t("users.hairTypes.Straight")
-              }}</a-select-option>
-              <a-select-option value="Wavy">{{
-                $t("users.hairTypes.Wavy")
-              }}</a-select-option>
-              <a-select-option value="Curly">{{
-                $t("users.hairTypes.Curly")
-              }}</a-select-option>
-              <a-select-option value="Kinky">{{
-                $t("users.hairTypes.Kinky")
-              }}</a-select-option>
+              <a-select-option value="Straight">
+                {{
+                  $t("users.hairTypes.Straight")
+                }}
+              </a-select-option>
+              <a-select-option value="Wavy">
+                {{
+                  $t("users.hairTypes.Wavy")
+                }}
+              </a-select-option>
+              <a-select-option value="Curly">
+                {{
+                  $t("users.hairTypes.Curly")
+                }}
+              </a-select-option>
+              <a-select-option value="Kinky">
+                {{
+                  $t("users.hairTypes.Kinky")
+                }}
+              </a-select-option>
             </a-select>
           </a-form-item>
         </div>
@@ -188,9 +299,11 @@
               <a-input v-model:value="formState.phone" />
             </a-form-item>
           </div>
-          <a-divider orientation="left">{{
-            $t("users.form.address")
-          }}</a-divider>
+          <a-divider orientation="left">
+            {{
+              $t("users.form.address")
+            }}
+          </a-divider>
           <a-form-item :label="$t('users.form.street')">
             <a-input v-model:value="formState.address.address" />
           </a-form-item>
@@ -253,28 +366,40 @@
             </a-form-item>
             <a-form-item :label="$t('users.role')" required>
               <a-select v-model:value="formState.role">
-                <a-select-option value="user">{{
-                  $t("common.roles.user")
-                }}</a-select-option>
-                <a-select-option value="moderator">{{
-                  $t("common.roles.moderator")
-                }}</a-select-option>
-                <a-select-option value="admin">{{
-                  $t("common.roles.admin")
-                }}</a-select-option>
+                <a-select-option value="user">
+                  {{
+                    $t("common.roles.user")
+                  }}
+                </a-select-option>
+                <a-select-option value="moderator">
+                  {{
+                    $t("common.roles.moderator")
+                  }}
+                </a-select-option>
+                <a-select-option value="admin">
+                  {{
+                    $t("common.roles.admin")
+                  }}
+                </a-select-option>
               </a-select>
             </a-form-item>
             <a-form-item :label="$t('users.status')">
               <a-select v-model:value="formState.status">
-                <a-select-option value="active">{{
-                  $t("common.status.active")
-                }}</a-select-option>
-                <a-select-option value="inactive">{{
-                  $t("common.status.inactive")
-                }}</a-select-option>
-                <a-select-option value="suspended">{{
-                  $t("common.status.suspended")
-                }}</a-select-option>
+                <a-select-option value="active">
+                  {{
+                    $t("common.status.active")
+                  }}
+                </a-select-option>
+                <a-select-option value="inactive">
+                  {{
+                    $t("common.status.inactive")
+                  }}
+                </a-select-option>
+                <a-select-option value="suspended">
+                  {{
+                    $t("common.status.suspended")
+                  }}
+                </a-select-option>
               </a-select>
             </a-form-item>
           </div>
@@ -295,97 +420,3 @@
     </a-form>
   </div>
 </template>
-
-<script setup lang="ts">
-import { LeftOutlined, UserOutlined } from "@ant-design/icons-vue";
-import type { User } from "~/types";
-
-definePageMeta({
-  layout: "default",
-  middleware: "auth",
-});
-
-const route = useRoute();
-const router = useRouter();
-const usersStore = useUsersStore();
-const { success, error } = useNotification();
-
-const isEditMode = computed(() => route.params.id && route.params.id !== "add");
-const loading = ref(false);
-
-const formState = reactive({
-  id: 0,
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  username: "",
-  password: "",
-  hair: { color: "", type: "" },
-  address: {
-    address: "",
-    city: "",
-    state: "",
-    stateCode: "",
-    postalCode: "",
-    country: "",
-  },
-  company: { name: "", department: "", title: "" },
-  role: "user",
-  status: "active",
-} as unknown as User);
-
-onMounted(async () => {
-  if (isEditMode.value) {
-    const id = Number(route.params.id);
-    if (!isNaN(id)) {
-      try {
-        const user = await usersStore.fetchUserById(id);
-        if (user) {
-          Object.assign(formState, user);
-          if (!formState.hair) formState.hair = { color: "", type: "" };
-          if (!formState.address)
-            formState.address = {
-              address: "",
-              city: "",
-              state: "",
-              stateCode: "",
-              postalCode: "",
-              country: "",
-            };
-          if (!formState.company)
-            formState.company = { name: "", department: "", title: "" };
-        }
-      } catch {
-        error("Error", "Failed to load user");
-        router.push("/users");
-      }
-    }
-  }
-});
-
-const handleSubmit = async () => {
-  try {
-    if (!formState.firstName || !formState.lastName || !formState.email) {
-      error("Validation Error", "Please fill in all required fields");
-      return;
-    }
-
-    loading.value = true;
-    if (isEditMode.value) {
-      await usersStore.updateUser(Number(route.params.id), formState);
-      success("Updated", "User updated successfully");
-      router.push("/users");
-    } else {
-      await usersStore.addUser(formState);
-      success("Created", "User created successfully");
-      router.push("/users");
-    }
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to save user";
-    error("Error", message);
-  } finally {
-    loading.value = false;
-  }
-};
-</script>

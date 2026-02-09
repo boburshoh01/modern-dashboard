@@ -1,3 +1,12 @@
+<script setup lang="ts">
+defineProps<{
+  type?: "full" | "card" | "table" | "spinner"
+  label?: string
+}>()
+
+const { t } = useI18n()
+</script>
+
 <template>
   <div
     v-if="type === 'full'"
@@ -6,7 +15,7 @@
     <div class="flex flex-col items-center gap-4">
       <div
         class="w-12 h-12 border-4 border-[#4880ff] border-t-transparent rounded-full animate-spin"
-      />
+      ></div>
       <p class="text-sm font-bold text-[#4880ff] animate-pulse">
         {{ label || t("common.loading", "Loading...") }}
       </p>
@@ -38,12 +47,3 @@
     <a-spin size="large" />
   </div>
 </template>
-
-<script setup lang="ts">
-const { t } = useI18n();
-
-defineProps<{
-  type?: "full" | "card" | "table" | "spinner";
-  label?: string;
-}>();
-</script>

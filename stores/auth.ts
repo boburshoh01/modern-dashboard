@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia'
-import type { AuthUser, LoginCredentials, RefreshTokenResponse } from '~/types'
+import type { AuthUser, LoginCredentials, RefreshTokenResponse } from "~/types"
+import { defineStore } from "pinia"
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: null as AuthUser | null,
     token: null as string | null,
@@ -11,8 +11,8 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    currentUser: (state) => state.user,
-    isLoggedIn: (state) => state.isAuthenticated && !!state.token,
+    currentUser: state => state.user,
+    isLoggedIn: state => state.isAuthenticated && !!state.token,
   },
 
   actions: {
@@ -21,22 +21,22 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       const config = useRuntimeConfig()
 
-      const tokenCookie = useCookie('auth_token', {
+      const tokenCookie = useCookie("auth_token", {
         maxAge: 60 * 60 * 24 * 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: import.meta.env.PROD,
+        sameSite: "strict",
       })
 
       try {
-        const response = await $fetch<AuthUser>('/auth/login', {
-          method: 'POST',
+        const response = await $fetch<AuthUser>("/auth/login", {
+          method: "POST",
           body: credentials,
-          baseURL: config.public.apiBase as string
+          baseURL: config.public.apiBase as string,
         })
 
         this.user = {
           ...response,
-          token: response.accessToken || ''
+          token: response.accessToken || "",
         }
         this.token = response.accessToken || null
         this.isAuthenticated = true
@@ -44,8 +44,8 @@ export const useAuthStore = defineStore('auth', {
 
         return response
       } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Login failed'
-        console.error('Login error:', err)
+        this.error = err instanceof Error ? err.message : "Login failed"
+        console.error("Login error:", err)
         throw err
       } finally {
         this.loading = false
@@ -53,29 +53,29 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      const tokenCookie = useCookie('auth_token')
+      const tokenCookie = useCookie("auth_token")
 
       this.user = null
       this.token = null
       this.isAuthenticated = false
       tokenCookie.value = null
 
-      return navigateTo('/login')
+      return navigateTo("/login")
     },
 
     async fetchUser(skipNavigation = false) {
       this.loading = true
       this.error = null
       const config = useRuntimeConfig()
-      const tokenCookie = useCookie('auth_token')
+      const tokenCookie = useCookie("auth_token")
 
       try {
-        const userData = await $fetch<AuthUser>('/auth/me', {
-          method: 'GET',
+        const userData = await $fetch<AuthUser>("/auth/me", {
+          method: "GET",
           baseURL: config.public.apiBase as string,
           headers: {
-            Authorization: `Bearer ${tokenCookie.value}`
-          }
+            Authorization: `Bearer ${tokenCookie.value}`,
+          },
         })
 
         this.user = userData
@@ -85,14 +85,14 @@ export const useAuthStore = defineStore('auth', {
           this.token = tokenCookie.value as string
         }
       } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to fetch user'
-        console.error('Fetch user error:', err)
+        this.error = err instanceof Error ? err.message : "Failed to fetch user"
+        console.error("Fetch user error:", err)
         this.user = null
         this.token = null
         this.isAuthenticated = false
 
         if (!skipNavigation) {
-          await navigateTo('/login')
+          await navigateTo("/login")
         }
       } finally {
         this.loading = false
@@ -103,17 +103,17 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       const config = useRuntimeConfig()
-      const tokenCookie = useCookie('auth_token')
+      const tokenCookie = useCookie("auth_token")
 
       try {
         if (!tokenCookie.value) {
-          throw new Error('No token available')
+          throw new Error("No token available")
         }
 
-        const response = await $fetch<RefreshTokenResponse>('/auth/refresh', {
-          method: 'POST',
+        const response = await $fetch<RefreshTokenResponse>("/auth/refresh", {
+          method: "POST",
           body: { refreshToken: tokenCookie.value },
-          baseURL: config.public.apiBase as string
+          baseURL: config.public.apiBase as string,
         })
 
         this.token = response.token
@@ -121,12 +121,12 @@ export const useAuthStore = defineStore('auth', {
 
         return response.token
       } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to refresh token'
-        console.error('Refresh token error:', err)
+        this.error = err instanceof Error ? err.message : "Failed to refresh token"
+        console.error("Refresh token error:", err)
         this.user = null
         this.token = null
         this.isAuthenticated = false
-        await navigateTo('/login')
+        await navigateTo("/login")
         throw err
       } finally {
         this.loading = false
@@ -139,7 +139,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async initializeAuth() {
-      const tokenCookie = useCookie('auth_token')
+      const tokenCookie = useCookie("auth_token")
 
       if (tokenCookie.value) {
         this.token = tokenCookie.value as string
@@ -147,7 +147,7 @@ export const useAuthStore = defineStore('auth', {
         await this.fetchUser(true)
 
         if (!this.user) {
-          console.warn('Token validation failed during initialization')
+          console.warn("Token validation failed during initialization")
           tokenCookie.value = null
           this.token = null
           this.isAuthenticated = false

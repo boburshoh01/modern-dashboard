@@ -1,3 +1,179 @@
+<script setup lang="ts">
+import type { ChartOptions } from "chart.js"
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  DropboxOutlined,
+  FieldTimeOutlined,
+  LineChartOutlined,
+  UsergroupAddOutlined,
+} from "@ant-design/icons-vue"
+import { storeToRefs } from "pinia"
+import { Line } from "vue-chartjs"
+import { useDashboardStore } from "~/stores/dashboard"
+
+definePageMeta({
+  middleware: "auth",
+  layout: "default",
+})
+
+const selectedMonth = ref("october")
+const selectedDealMonth = ref("october")
+
+const dashboardStore = useDashboardStore()
+const { stats, loading } = storeToRefs(dashboardStore)
+
+async function fetchDashboardStats() {
+  try {
+    await dashboardStore.fetchDashboardStats()
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error)
+    const { error: showError } = useNotification()
+    showError("Error", "Failed to load dashboard statistics")
+  }
+}
+
+const chartData = computed(() => ({
+  labels: [
+    "5k",
+    "10k",
+    "15k",
+    "20k",
+    "25k",
+    "30k",
+    "35k",
+    "40k",
+    "45k",
+    "50k",
+    "55k",
+    "60k",
+  ],
+  datasets: [
+    {
+      label: "Sales",
+      data: [20, 35, 45, 30, 60, 45, 60, 35, 75, 50, 65, 80],
+      borderColor: "#4880ff",
+      backgroundColor: (context: any) => {
+        const ctx = context.chart.ctx
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400)
+        gradient.addColorStop(0, "rgba(72, 128, 255, 0.4)")
+        gradient.addColorStop(1, "rgba(72, 128, 255, 0.0)")
+        return gradient
+      },
+      tension: 0.4,
+      fill: true,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    },
+  ],
+}))
+
+const chartOptions: ChartOptions<"line"> = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      mode: "index",
+      intersect: false,
+      backgroundColor: "#000",
+      titleColor: "#fff",
+      bodyColor: "#fff",
+      borderColor: "#fff",
+      borderWidth: 0,
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      border: {
+        display: false,
+      },
+      grid: {
+        color: "#f0f0f0",
+      },
+      ticks: {
+        color: "#a0a0a0",
+        callback: (value: any) => `${value}%`,
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: "#a0a0a0",
+      },
+    },
+  },
+}
+
+const { t } = useI18n()
+
+const dealsColumns = computed(() => [
+  { title: t("dashboard.productName"), key: "product", dataIndex: "product" },
+  { title: t("dashboard.location"), key: "location", dataIndex: "location" },
+  { title: t("dashboard.dateTime"), key: "date", dataIndex: "date" },
+  { title: t("dashboard.piece"), key: "piece", dataIndex: "piece" },
+  { title: t("dashboard.amount"), key: "amount", dataIndex: "amount" },
+  { title: t("dashboard.status"), key: "status", dataIndex: "status" },
+])
+
+const recentDeals = ref([
+  {
+    key: "1",
+    product: "Apple Watch",
+    location: "6096 Marjolaine Landing",
+    date: "12.09.2019 - 12.53 PM",
+    piece: "423",
+    amount: "$34,295",
+    status: "Delivered",
+    image: "https://via.placeholder.com/100?text=Apple+Watch",
+  },
+  {
+    key: "2",
+    product: "Apple Watch",
+    location: "6096 Marjolaine Landing",
+    date: "12.09.2019 - 12.53 PM",
+    piece: "423",
+    amount: "$34,295",
+    status: "Pending",
+    image: "https://via.placeholder.com/100?text=Apple+Watch",
+  },
+  {
+    key: "3",
+    product: "Apple Watch",
+    location: "6096 Marjolaine Landing",
+    date: "12.09.2019 - 12.53 PM",
+    piece: "423",
+    amount: "$34,295",
+    status: "Rejected",
+    image: "https://via.placeholder.com/100?text=Apple+Watch",
+  },
+])
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case "Delivered":
+      return "#00b69b"
+    case "Pending":
+      return "#ffbc01"
+    case "Rejected":
+      return "#ef3826"
+    default:
+      return "default"
+  }
+}
+
+function formatNumber(num: number) {
+  return new Intl.NumberFormat("en-US").format(num)
+}
+
+onMounted(() => {
+  fetchDashboardStats()
+})
+</script>
+
 <template>
   <div>
     <h1
@@ -162,9 +338,15 @@
               style="width: 120px"
               class="rounded-lg"
             >
-              <a-select-option value="october">October</a-select-option>
-              <a-select-option value="november">November</a-select-option>
-              <a-select-option value="december">December</a-select-option>
+              <a-select-option value="october">
+                October
+              </a-select-option>
+              <a-select-option value="november">
+                November
+              </a-select-option>
+              <a-select-option value="december">
+                December
+              </a-select-option>
             </a-select>
           </div>
           <div class="relative h-64 w-full">
@@ -182,9 +364,15 @@
               style="width: 120px"
               class="rounded-lg"
             >
-              <a-select-option value="october">October</a-select-option>
-              <a-select-option value="november">November</a-select-option>
-              <a-select-option value="december">December</a-select-option>
+              <a-select-option value="october">
+                October
+              </a-select-option>
+              <a-select-option value="november">
+                November
+              </a-select-option>
+              <a-select-option value="december">
+                December
+              </a-select-option>
             </a-select>
           </div>
           <div class="overflow-x-auto">
@@ -226,182 +414,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import {
-  ArrowUpOutlined,
-  ArrowDownOutlined,
-  UsergroupAddOutlined,
-  DropboxOutlined,
-  LineChartOutlined,
-  FieldTimeOutlined,
-} from "@ant-design/icons-vue";
-import type { ChartOptions } from "chart.js";
-import { Line } from "vue-chartjs";
-import { storeToRefs } from "pinia";
-import { useDashboardStore } from "~/stores/dashboard";
-
-definePageMeta({
-  middleware: "auth",
-  layout: "default",
-});
-
-const selectedMonth = ref("october");
-const selectedDealMonth = ref("october");
-
-const dashboardStore = useDashboardStore();
-const { stats, loading } = storeToRefs(dashboardStore);
-
-const fetchDashboardStats = async () => {
-  try {
-    await dashboardStore.fetchDashboardStats();
-  } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
-    const { error: showError } = useNotification();
-    showError("Error", "Failed to load dashboard statistics");
-  }
-};
-
-const chartData = computed(() => ({
-  labels: [
-    "5k",
-    "10k",
-    "15k",
-    "20k",
-    "25k",
-    "30k",
-    "35k",
-    "40k",
-    "45k",
-    "50k",
-    "55k",
-    "60k",
-  ],
-  datasets: [
-    {
-      label: "Sales",
-      data: [20, 35, 45, 30, 60, 45, 60, 35, 75, 50, 65, 80],
-      borderColor: "#4880ff",
-      backgroundColor: (context: any) => {
-        const ctx = context.chart.ctx;
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, "rgba(72, 128, 255, 0.4)");
-        gradient.addColorStop(1, "rgba(72, 128, 255, 0.0)");
-        return gradient;
-      },
-      tension: 0.4,
-      fill: true,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-    },
-  ],
-}));
-
-const chartOptions: ChartOptions<"line"> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      mode: "index",
-      intersect: false,
-      backgroundColor: "#000",
-      titleColor: "#fff",
-      bodyColor: "#fff",
-      borderColor: "#fff",
-      borderWidth: 0,
-    },
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      border: {
-        display: false,
-      },
-      grid: {
-        color: "#f0f0f0",
-      },
-      ticks: {
-        color: "#a0a0a0",
-        callback: (value: any) => value + "%",
-      },
-    },
-    x: {
-      grid: {
-        display: false,
-      },
-      ticks: {
-        color: "#a0a0a0",
-      },
-    },
-  },
-};
-
-const { t } = useI18n();
-
-const dealsColumns = computed(() => [
-  { title: t("dashboard.productName"), key: "product", dataIndex: "product" },
-  { title: t("dashboard.location"), key: "location", dataIndex: "location" },
-  { title: t("dashboard.dateTime"), key: "date", dataIndex: "date" },
-  { title: t("dashboard.piece"), key: "piece", dataIndex: "piece" },
-  { title: t("dashboard.amount"), key: "amount", dataIndex: "amount" },
-  { title: t("dashboard.status"), key: "status", dataIndex: "status" },
-]);
-
-const recentDeals = ref([
-  {
-    key: "1",
-    product: "Apple Watch",
-    location: "6096 Marjolaine Landing",
-    date: "12.09.2019 - 12.53 PM",
-    piece: "423",
-    amount: "$34,295",
-    status: "Delivered",
-    image: "https://via.placeholder.com/100?text=Apple+Watch",
-  },
-  {
-    key: "2",
-    product: "Apple Watch",
-    location: "6096 Marjolaine Landing",
-    date: "12.09.2019 - 12.53 PM",
-    piece: "423",
-    amount: "$34,295",
-    status: "Pending",
-    image: "https://via.placeholder.com/100?text=Apple+Watch",
-  },
-  {
-    key: "3",
-    product: "Apple Watch",
-    location: "6096 Marjolaine Landing",
-    date: "12.09.2019 - 12.53 PM",
-    piece: "423",
-    amount: "$34,295",
-    status: "Rejected",
-    image: "https://via.placeholder.com/100?text=Apple+Watch",
-  },
-]);
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Delivered":
-      return "#00b69b";
-    case "Pending":
-      return "#ffbc01";
-    case "Rejected":
-      return "#ef3826";
-    default:
-      return "default";
-  }
-};
-
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat("en-US").format(num);
-};
-
-onMounted(() => {
-  fetchDashboardStats();
-});
-</script>
 
 <style scoped>
 :deep(.ant-card) {

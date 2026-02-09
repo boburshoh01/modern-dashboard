@@ -1,3 +1,129 @@
+<script setup lang="ts">
+import {
+  AppstoreOutlined,
+  BellOutlined,
+  BulbOutlined,
+  CloseOutlined,
+  DownOutlined,
+  DropboxOutlined,
+  HeartOutlined,
+  HistoryOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  SearchOutlined,
+  SettingOutlined,
+  UsergroupAddOutlined,
+  UserOutlined,
+} from "@ant-design/icons-vue"
+import { theme } from "ant-design-vue"
+import { useNotification } from "~/composables/useNotification"
+import { useAuthStore } from "~/stores/auth"
+
+const authStore = useAuthStore()
+const { success, error } = useNotification()
+const router = useRouter()
+const colorMode = useColorMode()
+const { locale } = useI18n()
+
+const availableLocales = [
+  { code: "en", name: "English", flag: "https://flagcdn.com/w40/gb.png" },
+  { code: "uz", name: "O'zbek", flag: "https://flagcdn.com/w40/uz.png" },
+  { code: "ru", name: "Русский", flag: "https://flagcdn.com/w40/ru.png" },
+]
+
+const currentLocale = computed(
+  () =>
+    availableLocales.find(l => l.code === locale.value) || availableLocales[0],
+)
+
+const { setLocale } = useI18n()
+function setLocaleCode(code: string) {
+  setLocale(code as "en" | "uz" | "ru")
+}
+
+const sidebarOpen = ref(true)
+const isMiniSidebar = ref(false)
+const searchQuery = ref("")
+const windowWidth = ref(
+  typeof window !== "undefined" ? window.innerWidth : 1200,
+)
+
+const activeThemeAlgorithm = computed(() => {
+  return colorMode.value === "dark"
+    ? theme.darkAlgorithm
+    : theme.defaultAlgorithm
+})
+
+function toggleTheme() {
+  colorMode.preference = colorMode.value === "dark" ? "light" : "dark"
+}
+
+function toggleSidebar() {
+  if (import.meta.client && window.innerWidth >= 1024) {
+    isMiniSidebar.value = !isMiniSidebar.value
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarMini", JSON.stringify(isMiniSidebar.value))
+    }
+  } else {
+    sidebarOpen.value = !sidebarOpen.value
+  }
+}
+
+async function handleLogout() {
+  try {
+    await authStore.logout()
+    success("Logged Out", "You have been successfully logged out")
+    router.push("/login")
+  } catch {
+    error("Logout Error", "An error occurred during logout")
+  }
+}
+
+let lastWidth = 0
+
+function handleResize() {
+  if (typeof window === "undefined")
+    return
+  windowWidth.value = window.innerWidth
+  const isMobile = windowWidth.value < 1024
+
+  if (isMobile) {
+    sidebarOpen.value = false
+    isMiniSidebar.value = false
+  } else {
+    sidebarOpen.value = true
+    const savedMiniState = localStorage.getItem("sidebarMini")
+    if (savedMiniState !== null) {
+      isMiniSidebar.value = JSON.parse(savedMiniState)
+    }
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== "undefined") {
+    lastWidth = window.innerWidth
+
+    const savedMiniState = localStorage.getItem("sidebarMini")
+    if (savedMiniState !== null) {
+      isMiniSidebar.value = JSON.parse(savedMiniState)
+    }
+
+    if (lastWidth < 1024) {
+      sidebarOpen.value = false
+    } else {
+      sidebarOpen.value = true
+    }
+    window.addEventListener("resize", handleResize)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== "undefined") {
+    window.removeEventListener("resize", handleResize)
+  }
+})
+</script>
+
 <template>
   <a-config-provider
     :theme="{
@@ -12,18 +138,18 @@
         v-if="sidebarOpen && windowWidth < 1024"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[45] lg:hidden transition-opacity"
         @click="sidebarOpen = false"
-      />
+      ></div>
 
       <aside
+        class="bg-white dark:bg-dark-card fixed left-0 top-0 h-full z-50 border-r border-gray-200 dark:border-dark-border overflow-y-auto transition-all duration-300"
         :class="[
-          'bg-white dark:bg-dark-card fixed left-0 top-0 h-full z-50 border-r border-gray-200 dark:border-dark-border overflow-y-auto transition-all duration-300',
           sidebarOpen ? (isMiniSidebar ? 'w-20' : 'w-64') : '-translate-x-full',
           !sidebarOpen && 'lg:translate-x-0',
         ]"
       >
         <div
+          class="p-6 border-b border-gray-200 dark:border-dark-border flex items-center justify-between"
           :class="[
-            'p-6 border-b border-gray-200 dark:border-dark-border flex items-center justify-between',
             isMiniSidebar ? 'justify-center' : '',
           ]"
         >
@@ -48,8 +174,8 @@
         </div>
 
         <nav
+          class="p-4 space-y-1 flex flex-col h-[calc(100%-97px)]"
           :class="[
-            'p-4 space-y-1 flex flex-col h-[calc(100%-97px)]',
             isMiniSidebar ? 'px-2' : 'p-4',
           ]"
         >
@@ -211,8 +337,7 @@
                   />
                   <span
                     class="font-semibold text-[#646464] dark:text-dark-text-secondary"
-                    >{{ currentLocale.name }}</span
-                  >
+                  >{{ currentLocale.name }}</span>
                   <DownOutlined
                     class="text-[10px] text-[#646464] dark:text-dark-text-secondary"
                   />
@@ -237,13 +362,15 @@
                 <div class="flex items-center gap-3 cursor-pointer group">
                   <a-avatar
                     :src="
-                      authStore.user?.image ||
-                      'https://i.pravatar.cc/150?img=32'
+                      authStore.user?.image
+                        || 'https://i.pravatar.cc/150?img=32'
                     "
                     :size="44"
                     class="border-2 border-white dark:border-dark-border shadow-sm transition-colors group-hover:border-[#4880ff]"
                   >
-                    <template #icon><UserOutlined /></template>
+                    <template #icon>
+                      <UserOutlined />
+                    </template>
                   </a-avatar>
                   <div class="hidden md:block text-left">
                     <p
@@ -277,43 +404,42 @@
                         {{ authStore.user?.firstName }}
                         {{ authStore.user?.lastName }}
                       </p>
-                      <p class="text-xs text-gray-500">Admin</p>
+                      <p class="text-xs text-gray-500">
+                        Admin
+                      </p>
                     </div>
                     <a-menu-item
                       key="manage"
                       class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
                     >
-                      <template #icon
-                        ><UserOutlined class="text-blue-500"
-                      /></template>
+                      <template #icon>
+                        <UserOutlined class="text-blue-500" />
+                      </template>
                       <span
                         class="font-semibold text-gray-700 dark:text-gray-200"
-                        >Manage Account</span
-                      >
+                      >Manage Account</span>
                     </a-menu-item>
                     <a-menu-item
                       key="password"
                       class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
                     >
-                      <template #icon
-                        ><SettingOutlined class="text-purple-500"
-                      /></template>
+                      <template #icon>
+                        <SettingOutlined class="text-purple-500" />
+                      </template>
                       <span
                         class="font-semibold text-gray-700 dark:text-gray-200"
-                        >Change Password</span
-                      >
+                      >Change Password</span>
                     </a-menu-item>
                     <a-menu-item
                       key="activity"
                       class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
                     >
-                      <template #icon
-                        ><HistoryOutlined class="text-cyan-500"
-                      /></template>
+                      <template #icon>
+                        <HistoryOutlined class="text-cyan-500" />
+                      </template>
                       <span
                         class="font-semibold text-gray-700 dark:text-gray-200"
-                        >Activity Log</span
-                      >
+                      >Activity Log</span>
                     </a-menu-item>
                     <a-menu-divider
                       class="my-2 border-gray-100 dark:border-dark-border"
@@ -323,9 +449,9 @@
                       class="rounded-lg py-2 hover:bg-red-50 dark:hover:bg-dark-main"
                       @click="handleLogout"
                     >
-                      <template #icon
-                        ><LogoutOutlined class="text-red-500"
-                      /></template>
+                      <template #icon>
+                        <LogoutOutlined class="text-red-500" />
+                      </template>
                       <span class="font-semibold text-red-500">Log out</span>
                     </a-menu-item>
                   </a-menu>
@@ -341,137 +467,12 @@
           <div class="mb-6">
             <AppBreadcrumbs />
           </div>
-          <slot />
+          <slot></slot>
         </main>
       </div>
     </div>
   </a-config-provider>
 </template>
-
-<script setup lang="ts">
-import {
-  MenuOutlined,
-  CloseOutlined,
-  SearchOutlined,
-  BellOutlined,
-  DownOutlined,
-  UserOutlined,
-  AppstoreOutlined,
-  DropboxOutlined,
-  HeartOutlined,
-  UsergroupAddOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  BulbOutlined,
-  HistoryOutlined,
-} from "@ant-design/icons-vue";
-import { theme } from "ant-design-vue";
-import { useAuthStore } from "~/stores/auth";
-import { useNotification } from "~/composables/useNotification";
-
-const authStore = useAuthStore();
-const { success, error } = useNotification();
-const router = useRouter();
-const colorMode = useColorMode();
-const { locale } = useI18n();
-
-const availableLocales = [
-  { code: "en", name: "English", flag: "https://flagcdn.com/w40/gb.png" },
-  { code: "uz", name: "O'zbek", flag: "https://flagcdn.com/w40/uz.png" },
-  { code: "ru", name: "Русский", flag: "https://flagcdn.com/w40/ru.png" },
-];
-
-const currentLocale = computed(
-  () =>
-    availableLocales.find((l) => l.code === locale.value) || availableLocales[0]
-);
-
-const { setLocale } = useI18n();
-const setLocaleCode = (code: string) => {
-  setLocale(code as "en" | "uz" | "ru");
-};
-
-const sidebarOpen = ref(true);
-const isMiniSidebar = ref(false);
-const searchQuery = ref("");
-const windowWidth = ref(
-  typeof window !== "undefined" ? window.innerWidth : 1200
-);
-
-const activeThemeAlgorithm = computed(() => {
-  return colorMode.value === "dark"
-    ? theme.darkAlgorithm
-    : theme.defaultAlgorithm;
-});
-
-const toggleTheme = () => {
-  colorMode.preference = colorMode.value === "dark" ? "light" : "dark";
-};
-
-const toggleSidebar = () => {
-  if (import.meta.client && window.innerWidth >= 1024) {
-    isMiniSidebar.value = !isMiniSidebar.value;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sidebarMini", JSON.stringify(isMiniSidebar.value));
-    }
-  } else {
-    sidebarOpen.value = !sidebarOpen.value;
-  }
-};
-
-const handleLogout = async () => {
-  try {
-    await authStore.logout();
-    success("Logged Out", "You have been successfully logged out");
-    router.push("/login");
-  } catch {
-    error("Logout Error", "An error occurred during logout");
-  }
-};
-
-let lastWidth = 0;
-
-const handleResize = () => {
-  if (typeof window === "undefined") return;
-  windowWidth.value = window.innerWidth;
-  const isMobile = windowWidth.value < 1024;
-
-  if (isMobile) {
-    sidebarOpen.value = false;
-    isMiniSidebar.value = false;
-  } else {
-    sidebarOpen.value = true;
-    const savedMiniState = localStorage.getItem("sidebarMini");
-    if (savedMiniState !== null) {
-      isMiniSidebar.value = JSON.parse(savedMiniState);
-    }
-  }
-};
-
-onMounted(() => {
-  if (typeof window !== "undefined") {
-    lastWidth = window.innerWidth;
-
-    const savedMiniState = localStorage.getItem("sidebarMini");
-    if (savedMiniState !== null) {
-      isMiniSidebar.value = JSON.parse(savedMiniState);
-    }
-
-    if (lastWidth < 1024) {
-      sidebarOpen.value = false;
-    } else {
-      sidebarOpen.value = true;
-    }
-    window.addEventListener("resize", handleResize);
-  }
-});
-
-onUnmounted(() => {
-  if (typeof window !== "undefined") {
-    window.removeEventListener("resize", handleResize);
-  }
-});
-</script>
 
 <style>
 .dark .ant-form-item-label > label {

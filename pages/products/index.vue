@@ -1,3 +1,55 @@
+<script setup lang="ts">
+import {
+  HeartOutlined,
+  LeftOutlined,
+  PlusOutlined,
+  RightOutlined,
+  SearchOutlined,
+  StarFilled,
+} from "@ant-design/icons-vue"
+
+definePageMeta({
+  layout: "default",
+  middleware: "auth",
+})
+
+const productsStore = useProductsStore()
+const searchQuery = ref("")
+const selectedCategory = ref<string | undefined>(undefined)
+const currentPage = ref(1)
+
+async function fetchProducts() {
+  const skip = (currentPage.value - 1) * 10
+  await productsStore.fetchProducts({
+    limit: 10,
+    skip,
+    q: searchQuery.value,
+    category: selectedCategory.value,
+  })
+}
+
+await Promise.all([fetchProducts(), productsStore.fetchCategories()])
+
+function handleSearch() {
+  currentPage.value = 1
+  fetchProducts()
+}
+
+function handleFilter() {
+  currentPage.value = 1
+  fetchProducts()
+}
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  fetchProducts()
+}
+
+watch(selectedCategory, () => {
+  handleFilter()
+})
+</script>
+
 <template>
   <div class="space-y-6">
     <div
@@ -24,7 +76,7 @@
     >
       <div
         class="absolute inset-0 bg-gradient-to-r from-[#4880FF] to-[#6C9AFF]"
-      />
+      ></div>
 
       <div class="relative z-10 px-12 py-10 w-full max-w-2xl text-white">
         <p class="text-sm font-medium opacity-90 mb-2">
@@ -33,7 +85,7 @@
         <h2
           class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight"
           v-html="$t('products.heroTitle')"
-        />
+        ></h2>
         <p class="text-lg opacity-80 mb-8 font-light">
           {{ $t("products.heroSubtitle") }}
         </p>
@@ -47,10 +99,10 @@
 
       <div
         class="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -mr-20 -mt-20"
-      />
+      ></div>
       <div
         class="absolute bottom-0 right-[20%] w-64 h-64 bg-white opacity-5 rounded-full blur-2xl"
-      />
+      ></div>
 
       <button
         class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors backdrop-blur-sm"
@@ -72,7 +124,9 @@
         :bordered="false"
         @press-enter="handleSearch"
       >
-        <template #prefix><SearchOutlined class="text-gray-400" /></template>
+        <template #prefix>
+          <SearchOutlined class="text-gray-400" />
+        </template>
       </a-input>
       <a-select
         v-model:value="selectedCategory"
@@ -148,8 +202,7 @@
                 </template>
                 <span
                   class="text-gray-400 dark:text-dark-text-secondary font-medium ml-1"
-                  >({{ product.stock }})</span
-                >
+                >({{ product.stock }})</span>
               </div>
             </div>
             <button
@@ -183,58 +236,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import {
-  PlusOutlined,
-  SearchOutlined,
-  LeftOutlined,
-  RightOutlined,
-  HeartOutlined,
-  StarFilled,
-} from "@ant-design/icons-vue";
-
-definePageMeta({
-  layout: "default",
-  middleware: "auth",
-});
-
-const productsStore = useProductsStore();
-const searchQuery = ref("");
-const selectedCategory = ref<string | undefined>(undefined);
-const currentPage = ref(1);
-
-const fetchProducts = async () => {
-  const skip = (currentPage.value - 1) * 10;
-  await productsStore.fetchProducts({
-    limit: 10,
-    skip,
-    q: searchQuery.value,
-    category: selectedCategory.value,
-  });
-};
-
-await Promise.all([fetchProducts(), productsStore.fetchCategories()]);
-
-const handleSearch = () => {
-  currentPage.value = 1;
-  fetchProducts();
-};
-
-const handleFilter = () => {
-  currentPage.value = 1;
-  fetchProducts();
-};
-
-const handlePageChange = (page: number) => {
-  currentPage.value = page;
-  fetchProducts();
-};
-
-watch(selectedCategory, () => {
-  handleFilter();
-});
-</script>
 
 <style scoped>
 :deep(.ant-input-search-button) {

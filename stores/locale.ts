@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia"
 
-export type LocaleCode = 'en' | 'uz' | 'ru'
+export type LocaleCode = "en" | "uz" | "ru"
 
 export interface LocaleOption {
   code: LocaleCode
@@ -9,20 +9,20 @@ export interface LocaleOption {
 }
 
 export const localeOptions: LocaleOption[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'uz', name: 'O\'zbek', flag: '🇺🇿' },
-  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "uz", name: "O'zbek", flag: "🇺🇿" },
+  { code: "ru", name: "Русский", flag: "🇷🇺" },
 ]
 
-export const useLocaleStore = defineStore('locale', {
+export const useLocaleStore = defineStore("locale", {
   state: () => ({
-    currentLocale: 'en' as LocaleCode,
+    currentLocale: "en" as LocaleCode,
     availableLocales: localeOptions,
   }),
 
   getters: {
-    locale: (state) => state.currentLocale,
-    locales: (state) => state.availableLocales,
+    locale: state => state.currentLocale,
+    locales: state => state.availableLocales,
     currentLocaleOption: (state) => {
       return state.availableLocales.find(l => l.code === state.currentLocale)
     },
@@ -33,7 +33,7 @@ export const useLocaleStore = defineStore('locale', {
       if (this.availableLocales.some(l => l.code === locale)) {
         this.currentLocale = locale
 
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           const nuxtApp = useNuxtApp()
           if (nuxtApp.$i18n) {
             nuxtApp.$i18n.setLocale(locale)
@@ -43,7 +43,7 @@ export const useLocaleStore = defineStore('locale', {
     },
 
     initLocale() {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         const nuxtApp = useNuxtApp()
         if (nuxtApp.$i18n) {
           const i18nLocale = nuxtApp.$i18n.locale.value as LocaleCode
@@ -56,8 +56,8 @@ export const useLocaleStore = defineStore('locale', {
   },
 
   persist: {
-    key: 'locale',
-    storage: typeof window !== 'undefined' ? localStorage : undefined,
-    paths: ['currentLocale'],
+    key: "locale",
+    storage: typeof window !== "undefined" ? localStorage : undefined,
+    paths: ["currentLocale"],
   },
 })

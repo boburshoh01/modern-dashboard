@@ -1,3 +1,51 @@
+<script setup lang="ts">
+import type { Product } from "~/types"
+import {
+  HeartFilled,
+  LeftOutlined,
+  RightOutlined,
+  StarFilled,
+} from "@ant-design/icons-vue"
+
+definePageMeta({
+  layout: "default",
+  middleware: "auth",
+})
+
+const loading = ref(true)
+const favorites = ref<Product[]>([])
+const currentPage = ref(1)
+const total = ref(0)
+const { get } = useApi()
+
+async function fetchFavorites() {
+  loading.value = true
+  try {
+    const skip = (currentPage.value - 1) * 9
+    const response = await get<any>(`/products?limit=9&skip=${skip + 15}`)
+    favorites.value = response.data.products
+    total.value = response.data.total
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchFavorites()
+})
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  fetchFavorites()
+}
+
+function removeFavorite(id: number) {
+  favorites.value = favorites.value.filter(p => p.id !== id)
+}
+</script>
+
 <template>
   <div class="space-y-6">
     <h1
@@ -75,8 +123,7 @@
                 </template>
                 <span
                   class="text-gray-400 dark:text-dark-text-secondary font-medium ml-1"
-                  >({{ product.stock }})</span
-                >
+                >({{ product.stock }})</span>
               </div>
             </div>
             <button
@@ -111,51 +158,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import {
-  HeartFilled,
-  LeftOutlined,
-  RightOutlined,
-  StarFilled,
-} from "@ant-design/icons-vue";
-import type { Product } from "~/types";
-
-definePageMeta({
-  layout: "default",
-  middleware: "auth",
-});
-
-const loading = ref(true);
-const favorites = ref<Product[]>([]);
-const currentPage = ref(1);
-const total = ref(0);
-const { get } = useApi();
-
-const fetchFavorites = async () => {
-  loading.value = true;
-  try {
-    const skip = (currentPage.value - 1) * 9;
-    const response = await get<any>(`/products?limit=9&skip=${skip + 15}`);
-    favorites.value = response.data.products;
-    total.value = response.data.total;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-};
-
-onMounted(() => {
-  fetchFavorites();
-});
-
-const handlePageChange = (page: number) => {
-  currentPage.value = page;
-  fetchFavorites();
-};
-
-const removeFavorite = (id: number) => {
-  favorites.value = favorites.value.filter((p) => p.id !== id);
-};
-</script>

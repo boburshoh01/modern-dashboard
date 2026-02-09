@@ -1,32 +1,45 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* UnoCSS Directives */
+@unocss preflights;
+@unocss default;
 
 /* Custom global styles */
-@layer base {
-  body {
-    @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-dark-text-primary transition-colors duration-300;
-    font-family: "Nunito Sans", sans-serif;
-  }
+body {
+  @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-white transition-colors duration-300;
+  font-family: "Nunito Sans", sans-serif;
+}
 
-  * {
-    font-family: "Nunito Sans", sans-serif;
-  }
+* {
+  font-family: "Nunito Sans", sans-serif;
+}
+
+/* Button reset - fix UnoCSS default borders */
+button {
+  border: none;
+  background: transparent;
+}
+
+/* Link reset - remove default underline */
+a {
+  text-decoration: none;
+}
+
+/* List reset - remove default markers */
+ol,
+ul {
+  list-style: none;
 }
 
 /* Ant Design customization */
-@layer components {
-  :root {
-    --ant-primary-color: #4880ff;
-    --ant-primary-color-hover: #3a6fcc;
-    --ant-primary-color-active: #2c5ab3;
-  }
+:root {
+  --ant-primary-color: #4880ff;
+  --ant-primary-color-hover: #3a6fcc;
+  --ant-primary-color-active: #2c5ab3;
+}
 
-  /* Ensure Ant Design components inherit font */
-  .ant-btn,
-  .ant-input,
-  .ant-select,
-  .ant-form-item-label > label {
-    font-family: "Nunito Sans", sans-serif;
-  }
+/* Ensure Ant Design components inherit font */
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-form-item-label>label {
+  font-family: "Nunito Sans", sans-serif;
 }

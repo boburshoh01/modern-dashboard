@@ -1,9 +1,11 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia"
 
-const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message
-  if (typeof err === 'string') return err
-  return 'An unknown error occurred'
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error)
+    return err.message
+  if (typeof err === "string")
+    return err
+  return "An unknown error occurred"
 }
 
 export interface DashboardStats {
@@ -13,7 +15,7 @@ export interface DashboardStats {
   totalPending: number
 }
 
-export const useDashboardStore = defineStore('dashboard', {
+export const useDashboardStore = defineStore("dashboard", {
   state: () => ({
     stats: {
       totalUsers: 0,
@@ -26,9 +28,9 @@ export const useDashboardStore = defineStore('dashboard', {
   }),
 
   getters: {
-    dashboardStats: (state) => state.stats,
-    isLoading: (state) => state.loading,
-    hasError: (state) => !!state.error,
+    dashboardStats: state => state.stats,
+    isLoading: state => state.loading,
+    hasError: state => !!state.error,
   },
 
   actions: {
@@ -39,9 +41,9 @@ export const useDashboardStore = defineStore('dashboard', {
 
       try {
         const [usersResponse, productsResponse, postsResponse] = await Promise.all([
-          get<{ total: number }>('/users?limit=0'),
-          get<{ products: any[]; total: number }>('/products?limit=30'),
-          get<{ total: number }>('/posts?limit=0'),
+          get<{ total: number }>("/users?limit=0"),
+          get<{ products: any[]; total: number }>("/products?limit=30"),
+          get<{ total: number }>("/posts?limit=0"),
         ])
 
         this.stats.totalUsers = usersResponse.data.total
@@ -54,7 +56,7 @@ export const useDashboardStore = defineStore('dashboard', {
         }, 0)
         this.stats.totalSales = Math.round(totalSales)
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to fetch dashboard statistics'
+        this.error = getErrorMessage(err) || "Failed to fetch dashboard statistics"
         throw err
       } finally {
         this.loading = false

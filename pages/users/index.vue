@@ -1,3 +1,132 @@
+<script setup lang="ts">
+import {
+  DeleteOutlined,
+  EditOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons-vue"
+
+definePageMeta({
+  layout: "default",
+  middleware: "auth",
+})
+
+const usersStore = useUsersStore()
+const { success, error } = useNotification()
+
+const searchQuery = ref("")
+const filters = reactive({
+  key: undefined as string | undefined,
+  value: undefined as string | undefined,
+})
+const currentPage = ref(1)
+
+const { t } = useI18n()
+
+const columns = computed(() => [
+  {
+    title: t("users.name"),
+    key: "name",
+    width: 250,
+    fixed: "left",
+  },
+  {
+    title: t("users.email"),
+    dataIndex: "email",
+    key: "email",
+    width: 250,
+  },
+  {
+    title: t("users.phone"),
+    dataIndex: "phone",
+    key: "phone",
+    width: 180,
+  },
+  {
+    title: t("users.username"),
+    dataIndex: "username",
+    key: "username",
+    width: 150,
+  },
+  {
+    title: t("users.role"),
+    key: "role",
+    width: 120,
+  },
+  {
+    title: t("users.status"),
+    key: "status",
+    width: 120,
+  },
+  {
+    title: t("users.action"),
+    key: "actions",
+    width: 120,
+    fixed: "right",
+    align: "center",
+  },
+])
+
+async function fetchUsers() {
+  const skip = (currentPage.value - 1) * 10
+  await usersStore.fetchUsers({
+    limit: 10,
+    skip,
+    search: searchQuery.value,
+    key: filters.key,
+    value: filters.value,
+  })
+}
+
+onMounted(() => {
+  fetchUsers()
+})
+
+function handleSearch() {
+  currentPage.value = 1
+  filters.key = undefined
+  filters.value = undefined
+  fetchUsers()
+}
+
+watch(
+  () => [filters.key, filters.value],
+  () => {
+    if (filters.key && filters.value) {
+      searchQuery.value = ""
+      currentPage.value = 1
+      fetchUsers()
+    }
+  },
+)
+
+function resetFilters() {
+  filters.key = undefined
+  filters.value = undefined
+  searchQuery.value = ""
+  currentPage.value = 1
+  fetchUsers()
+}
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  fetchUsers()
+}
+
+async function handleDelete(id: number) {
+  try {
+    await usersStore.deleteUser(id)
+    success("Deleted", "User deleted successfully")
+  } catch (err) {
+    console.error(err)
+    error("Error", "Failed to delete user")
+  }
+}
+
+const getRowKey = (record: { id: number }) => record.id
+</script>
+
 <template>
   <div class="space-y-6">
     <div
@@ -35,14 +164,22 @@
         class="w-full sm:w-32 rounded-lg bg-[#F5F6FA] dark:bg-dark-main"
         :bordered="false"
       >
-        <a-select-option value="firstName">{{
-          $t("users.name")
-        }}</a-select-option>
-        <a-select-option value="email">{{ $t("users.email") }}</a-select-option>
-        <a-select-option value="username">{{
-          $t("users.username")
-        }}</a-select-option>
-        <a-select-option value="role">{{ $t("users.role") }}</a-select-option>
+        <a-select-option value="firstName">
+          {{
+            $t("users.name")
+          }}
+        </a-select-option>
+        <a-select-option value="email">
+          {{ $t("users.email") }}
+        </a-select-option>
+        <a-select-option value="username">
+          {{
+            $t("users.username")
+          }}
+        </a-select-option>
+        <a-select-option value="role">
+          {{ $t("users.role") }}
+        </a-select-option>
       </a-select>
 
       <a-input
@@ -66,7 +203,9 @@
           :bordered="false"
           @press-enter="handleSearch"
         >
-          <template #prefix><SearchOutlined class="text-gray-400" /></template>
+          <template #prefix>
+            <SearchOutlined class="text-gray-400" />
+          </template>
         </a-input>
       </div>
     </div>
@@ -116,8 +255,7 @@
           <template v-else-if="column.key === 'status'">
             <span
               class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-600"
-              >Active</span
-            >
+            >Active</span>
           </template>
 
           <template v-else-if="column.key === 'actions'">
@@ -161,132 +299,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import {
-  PlusOutlined,
-  FilterOutlined,
-  ReloadOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons-vue";
-
-definePageMeta({
-  layout: "default",
-  middleware: "auth",
-});
-
-const usersStore = useUsersStore();
-const { success, error } = useNotification();
-
-const searchQuery = ref("");
-const filters = reactive({
-  key: undefined as string | undefined,
-  value: undefined as string | undefined,
-});
-const currentPage = ref(1);
-
-const { t } = useI18n();
-
-const columns = computed(() => [
-  {
-    title: t("users.name"),
-    key: "name",
-    width: 250,
-    fixed: "left",
-  },
-  {
-    title: t("users.email"),
-    dataIndex: "email",
-    key: "email",
-    width: 250,
-  },
-  {
-    title: t("users.phone"),
-    dataIndex: "phone",
-    key: "phone",
-    width: 180,
-  },
-  {
-    title: t("users.username"),
-    dataIndex: "username",
-    key: "username",
-    width: 150,
-  },
-  {
-    title: t("users.role"),
-    key: "role",
-    width: 120,
-  },
-  {
-    title: t("users.status"),
-    key: "status",
-    width: 120,
-  },
-  {
-    title: t("users.action"),
-    key: "actions",
-    width: 120,
-    fixed: "right",
-    align: "center",
-  },
-]);
-
-const fetchUsers = async () => {
-  const skip = (currentPage.value - 1) * 10;
-  await usersStore.fetchUsers({
-    limit: 10,
-    skip,
-    search: searchQuery.value,
-    key: filters.key,
-    value: filters.value,
-  });
-};
-
-onMounted(() => {
-  fetchUsers();
-});
-
-const handleSearch = () => {
-  currentPage.value = 1;
-  filters.key = undefined;
-  filters.value = undefined;
-  fetchUsers();
-};
-
-watch(
-  () => [filters.key, filters.value],
-  () => {
-    if (filters.key && filters.value) {
-      searchQuery.value = "";
-      currentPage.value = 1;
-      fetchUsers();
-    }
-  }
-);
-
-const resetFilters = () => {
-  filters.key = undefined;
-  filters.value = undefined;
-  searchQuery.value = "";
-  currentPage.value = 1;
-  fetchUsers();
-};
-
-const handlePageChange = (page: number) => {
-  currentPage.value = page;
-  fetchUsers();
-};
-
-const handleDelete = async (id: number) => {
-  try {
-    await usersStore.deleteUser(id);
-    success("Deleted", "User deleted successfully");
-  } catch (err) {
-    console.error(err);
-    error("Error", "Failed to delete user");
-  }
-};
-
-const getRowKey = (record: { id: number }) => record.id;
-</script>

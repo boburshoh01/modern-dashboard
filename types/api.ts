@@ -10,8 +10,8 @@ export interface TableColumn {
   key: string
   sorter?: boolean
   width?: number | string
-  align?: 'left' | 'center' | 'right'
-  fixed?: 'left' | 'right'
+  align?: "left" | "center" | "right"
+  fixed?: "left" | "right"
 }
 
 export interface FilterParams {
@@ -20,5 +20,5 @@ export interface FilterParams {
 
 export interface SortParams {
   field: string
-  order: 'ascend' | 'descend' | null
+  order: "ascend" | "descend" | null
 }

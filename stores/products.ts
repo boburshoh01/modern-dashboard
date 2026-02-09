@@ -1,13 +1,15 @@
-import { defineStore } from 'pinia'
-import type { Product, ProductResponse, Category } from '~/types'
+import type { Category, Product, ProductResponse } from "~/types"
+import { defineStore } from "pinia"
 
-const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message
-  if (typeof err === 'string') return err
-  return 'An unknown error occurred'
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error)
+    return err.message
+  if (typeof err === "string")
+    return err
+  return "An unknown error occurred"
 }
 
-export const useProductsStore = defineStore('products', {
+export const useProductsStore = defineStore("products", {
   state: () => ({
     products: [] as Product[],
     total: 0,
@@ -26,12 +28,11 @@ export const useProductsStore = defineStore('products', {
       const { get } = useApi()
 
       try {
-        let url = '/products'
+        let url = "/products"
 
         if (params.q) {
           url = `/products/search?q=${params.q}`
-        }
-        else if (params.category) {
+        } else if (params.category) {
           url = `/products/category/${params.category}`
         }
 
@@ -47,8 +48,8 @@ export const useProductsStore = defineStore('products', {
         this.skip = response.data.skip
         this.limit = response.data.limit
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to fetch products'
-        console.error('Error fetching products:', err)
+        this.error = getErrorMessage(err) || "Failed to fetch products"
+        console.error("Error fetching products:", err)
         throw err
       } finally {
         this.loading = false
@@ -65,7 +66,7 @@ export const useProductsStore = defineStore('products', {
         this.currentProduct = response.data
         return response.data
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to fetch product'
+        this.error = getErrorMessage(err) || "Failed to fetch product"
         throw err
       } finally {
         this.loading = false
@@ -75,11 +76,11 @@ export const useProductsStore = defineStore('products', {
     async fetchCategories() {
       const { get } = useApi()
       try {
-        const response = await get<Category[]>('/products/categories')
+        const response = await get<Category[]>("/products/categories")
         this.categories = response.data
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to fetch categories'
-        console.error('Error fetching categories:', err)
+        this.error = getErrorMessage(err) || "Failed to fetch categories"
+        console.error("Error fetching categories:", err)
         throw err
       }
     },
@@ -88,11 +89,11 @@ export const useProductsStore = defineStore('products', {
       this.loading = true
       const { post } = useApi()
       try {
-        const response = await post<Product>('/products/add', productData)
+        const response = await post<Product>("/products/add", productData)
         this.products.unshift(response.data)
         return response.data
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to add product'
+        this.error = getErrorMessage(err) || "Failed to add product"
         throw err
       } finally {
         this.loading = false
@@ -111,7 +112,7 @@ export const useProductsStore = defineStore('products', {
         this.currentProduct = response.data
         return response.data
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to update product'
+        this.error = getErrorMessage(err) || "Failed to update product"
         throw err
       } finally {
         this.loading = false
@@ -125,11 +126,11 @@ export const useProductsStore = defineStore('products', {
         await del(`/products/${id}`)
         this.products = this.products.filter(p => p.id !== id)
       } catch (err: unknown) {
-        this.error = getErrorMessage(err) || 'Failed to delete product'
+        this.error = getErrorMessage(err) || "Failed to delete product"
         throw err
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 })

@@ -1,3 +1,32 @@
+<script setup lang="ts">
+const props = defineProps({
+  error: {
+    type: Object,
+    required: true,
+  },
+})
+
+const errorTitle = computed(() => {
+  if (props.error.statusCode === 404)
+    return "Looks like you've got lost...."
+  if (props.error.statusCode === 403)
+    return "Access Denied"
+  return "Something Went Wrong"
+})
+
+const errorMessage = computed(() => {
+  if (props.error.statusCode === 404) {
+    return "Oops! The page you're looking for doesn't exist. It might have been moved or deleted."
+  }
+  if (props.error.statusCode === 403) {
+    return "Sorry, you don't have permission to access this page. Please contact your administrator."
+  }
+  return "An unexpected error occurred. Our team has been notified and is working on a fix."
+})
+
+const handleError = () => clearError({ redirect: "/dashboard" })
+</script>
+
 <template>
   <div
     class="min-h-screen bg-[#4880ff] relative flex items-center justify-center p-4 overflow-hidden"
@@ -46,14 +75,36 @@
           xmlns="http://www.w3.org/2000/svg"
           class="w-full h-auto"
         >
-          <rect x="0" y="0" width="440" height="280" rx="20" fill="#EAF2FF" />
+          <rect
+            x="0"
+            y="0"
+            width="440"
+            height="280"
+            rx="20"
+            fill="#EAF2FF"
+          />
           <path
             d="M0 20C0 8.95431 8.95431 0 20 0H420C431.046 0 440 8.95431 440 20V54H0V20Z"
             fill="#D0E2FF"
           />
-          <circle cx="34" cy="27" r="6" fill="#FF5F56" />
-          <circle cx="56" cy="27" r="6" fill="#FFBD2E" />
-          <circle cx="78" cy="27" r="6" fill="#27C93F" />
+          <circle
+            cx="34"
+            cy="27"
+            r="6"
+            fill="#FF5F56"
+          />
+          <circle
+            cx="56"
+            cy="27"
+            r="6"
+            fill="#FFBD2E"
+          />
+          <circle
+            cx="78"
+            cy="27"
+            r="6"
+            fill="#27C93F"
+          />
           <rect
             x="110"
             y="17"
@@ -64,7 +115,14 @@
             fill-opacity="0.5"
           />
 
-          <rect x="0" y="54" width="440" height="226" rx="0" fill="#4880FF" />
+          <rect
+            x="0"
+            y="54"
+            width="440"
+            height="226"
+            rx="0"
+            fill="#4880FF"
+          />
           <path
             d="M0 54H440V260C440 271.046 431.046 280 420 280H20C8.9543 280 0 271.046 0 260V54Z"
             fill="#4880FF"
@@ -107,9 +165,27 @@
             fill-opacity="0.8"
           />
 
-          <circle cx="350" cy="240" r="4" fill="white" fill-opacity="0.8" />
-          <circle cx="370" cy="240" r="4" fill="white" fill-opacity="0.8" />
-          <circle cx="390" cy="240" r="4" fill="white" fill-opacity="0.8" />
+          <circle
+            cx="350"
+            cy="240"
+            r="4"
+            fill="white"
+            fill-opacity="0.8"
+          />
+          <circle
+            cx="370"
+            cy="240"
+            r="4"
+            fill="white"
+            fill-opacity="0.8"
+          />
+          <circle
+            cx="390"
+            cy="240"
+            r="4"
+            fill="white"
+            fill-opacity="0.8"
+          />
         </svg>
       </div>
 
@@ -138,33 +214,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-const props = defineProps({
-  error: {
-    type: Object,
-    required: true,
-  },
-});
-
-const errorTitle = computed(() => {
-  if (props.error.statusCode === 404) return "Looks like you've got lost....";
-  if (props.error.statusCode === 403) return "Access Denied";
-  return "Something Went Wrong";
-});
-
-const errorMessage = computed(() => {
-  if (props.error.statusCode === 404) {
-    return "Oops! The page you're looking for doesn't exist. It might have been moved or deleted.";
-  }
-  if (props.error.statusCode === 403) {
-    return "Sorry, you don't have permission to access this page. Please contact your administrator.";
-  }
-  return "An unexpected error occurred. Our team has been notified and is working on a fix.";
-});
-
-const handleError = () => clearError({ redirect: "/dashboard" });
-</script>
 
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap");

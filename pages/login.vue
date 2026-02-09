@@ -1,3 +1,82 @@
+<script setup lang="ts">
+import { useNotification } from "~/composables/useNotification"
+import { useAuthStore } from "~/stores/auth"
+
+definePageMeta({
+  layout: false,
+  middleware: "guest",
+})
+
+const authStore = useAuthStore()
+const { success, error } = useNotification()
+const router = useRouter()
+
+const loading = ref(false)
+const imageError = ref(false)
+const showPassword = ref(false)
+
+const formState = reactive({
+  username: "",
+  password: "",
+  rememberMe: true,
+})
+
+const errors = reactive({
+  username: "",
+  password: "",
+})
+
+function handleImageError() {
+  imageError.value = true
+}
+
+function validateForm() {
+  let isValid = true
+  errors.username = ""
+  errors.password = ""
+
+  if (!formState.username.trim()) {
+    errors.username = "Please enter your email or username"
+    isValid = false
+  }
+
+  if (!formState.password) {
+    errors.password = "Please enter your password"
+    isValid = false
+  } else if (formState.password.length < 6) {
+    errors.password = "Password must be at least 6 characters"
+    isValid = false
+  }
+
+  return isValid
+}
+
+async function handleLogin() {
+  if (!validateForm()) {
+    return
+  }
+
+  loading.value = true
+  try {
+    await authStore.login({
+      username: formState.username,
+      password: formState.password,
+    })
+
+    success("Login Successful", "Welcome back!")
+
+    await router.push("/dashboard")
+  } catch (err: any) {
+    const errorMessage
+      = err.response?.data?.message
+        || "Login failed. Please check your credentials."
+    error("Login Failed", errorMessage)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <div
     class="min-h-screen bg-[#4880ff] relative overflow-hidden flex items-center justify-center"
@@ -73,7 +152,7 @@
             </p>
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-6">
+          <form class="space-y-6" @submit.prevent="handleLogin">
             <div>
               <label
                 class="block text-[16px] text-[#202224]/80 mb-2 tracking-[-0.0643px]"
@@ -84,9 +163,9 @@
                 v-model="formState.username"
                 type="text"
                 :placeholder="$t('auth.emailPlaceholder')"
+                class="w-full h-14 px-4 bg-[#f1f4f9] border rounded-lg text-[16px] text-[#202224] placeholder-[#a6a6a6] focus:outline-none focus:ring-2 transition-all"
                 :class="[
-                  'w-full h-14 px-4 bg-[#f1f4f9] border rounded-lg text-[16px] text-[#202224] placeholder-[#a6a6a6] focus:outline-none focus:ring-2 transition-all',
-                  errors.username ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : 'border-[#d8d8d8] focus:border-[#4880ff] focus:ring-[#4880ff]/10'
+                  errors.username ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : 'border-[#d8d8d8] focus:border-[#4880ff] focus:ring-[#4880ff]/10',
                 ]"
               />
               <p v-if="errors.username" class="mt-1 text-sm text-red-500">
@@ -101,7 +180,7 @@
                 </label>
                 <button
                   type="button"
-                  class="text-[16px] text-[#202224]/60 hover:text-[#202224]/80 transition-colors tracking-[-0.0643px]"
+                  class="text-[16px] text-[#202224]/60 hover:text-[#202224]/80 transition-colors tracking-[-0.0643px] border-none bg-transparent cursor-pointer"
                 >
                   {{ $t("auth.forgotPassword") }}
                 </button>
@@ -111,15 +190,15 @@
                   v-model="formState.password"
                   :type="showPassword ? 'text' : 'password'"
                   :placeholder="$t('auth.passwordPlaceholder')"
+                  class="w-full h-14 px-4 pr-12 bg-[#f1f4f9] border rounded-lg text-[16px] text-[#202224] placeholder-[#a6a6a6] focus:outline-none focus:ring-2 transition-all"
                   :class="[
-                    'w-full h-14 px-4 pr-12 bg-[#f1f4f9] border rounded-lg text-[16px] text-[#202224] placeholder-[#a6a6a6] focus:outline-none focus:ring-2 transition-all',
-                    errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : 'border-[#d8d8d8] focus:border-[#4880ff] focus:ring-[#4880ff]/10'
+                    errors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500/10' : 'border-[#d8d8d8] focus:border-[#4880ff] focus:ring-[#4880ff]/10',
                   ]"
                 />
                 <button
                   type="button"
-                  @click="showPassword = !showPassword"
                   class="absolute right-4 top-1/2 -translate-y-1/2 text-[#202224]/60 hover:text-[#202224]/80"
+                  @click="showPassword = !showPassword"
                 >
                   <svg
                     v-if="!showPassword"
@@ -198,12 +277,12 @@
                   r="10"
                   stroke="currentColor"
                   stroke-width="4"
-                ></circle>
+                />
                 <path
                   class="opacity-75"
                   fill="currentColor"
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
+                />
               </svg>
               {{ $t("auth.signIn") }}
             </button>
@@ -214,7 +293,7 @@
               </span>
               <button
                 type="button"
-                class="ml-1 text-[16px] font-bold text-[#5a8cff] underline hover:text-[#4880ff] transition-colors"
+                class="ml-1 text-[16px] font-bold text-[#5a8cff] underline hover:text-[#4880ff] transition-colors border-none bg-transparent cursor-pointer"
               >
                 {{ $t("auth.createAccount") }}
               </button>
@@ -225,85 +304,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
-import { useNotification } from "~/composables/useNotification";
-
-definePageMeta({
-  layout: false,
-  middleware: "guest",
-});
-
-const authStore = useAuthStore();
-const { success, error } = useNotification();
-const router = useRouter();
-
-const loading = ref(false);
-const imageError = ref(false);
-const showPassword = ref(false);
-
-const formState = reactive({
-  username: "",
-  password: "",
-  rememberMe: true,
-});
-
-const errors = reactive({
-  username: "",
-  password: "",
-});
-
-const handleImageError = () => {
-  imageError.value = true;
-};
-
-const validateForm = () => {
-  let isValid = true;
-  errors.username = "";
-  errors.password = "";
-
-  if (!formState.username.trim()) {
-    errors.username = "Please enter your email or username";
-    isValid = false;
-  }
-
-  if (!formState.password) {
-    errors.password = "Please enter your password";
-    isValid = false;
-  } else if (formState.password.length < 6) {
-    errors.password = "Password must be at least 6 characters";
-    isValid = false;
-  }
-
-  return isValid;
-};
-
-const handleLogin = async () => {
-  if (!validateForm()) {
-    return;
-  }
-
-  loading.value = true;
-  try {
-    await authStore.login({
-      username: formState.username,
-      password: formState.password,
-    });
-
-    success("Login Successful", "Welcome back!");
-
-    await router.push("/dashboard");
-  } catch (err: any) {
-    const errorMessage =
-      err.response?.data?.message ||
-      "Login failed. Please check your credentials.";
-    error("Login Failed", errorMessage);
-  } finally {
-    loading.value = false;
-  }
-};
-</script>
 
 <style scoped>
 * {

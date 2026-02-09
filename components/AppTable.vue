@@ -1,3 +1,37 @@
+<script setup lang="ts">
+import type { TableProps } from "ant-design-vue"
+
+interface Props {
+  loading?: boolean
+  dataSource?: any[]
+  columns?: any[]
+  emptyTitle?: string
+  emptyDescription?: string
+  hidePagination?: boolean
+  pagination?: TableProps["pagination"]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+  dataSource: () => [],
+  columns: () => [],
+  hidePagination: false,
+})
+
+const paginationConfig = computed(() => {
+  if (props.hidePagination)
+    return false
+
+  return {
+    pageSize: 10,
+    showSizeChanger: true,
+    showTotal: (total: number) => `Total ${total} items`,
+    class: "custom-pagination",
+    ...(props.pagination || {}),
+  }
+})
+</script>
+
 <template>
   <div class="app-table-container">
     <a-table
@@ -9,7 +43,7 @@
       :pagination="paginationConfig"
     >
       <template v-for="slotName in Object.keys($slots)" #[slotName]="slotProps">
-        <slot :name="slotName" v-bind="slotProps" />
+        <slot :name="slotName" v-bind="slotProps"></slot>
       </template>
 
       <template #emptyText>
@@ -19,46 +53,13 @@
           :description="emptyDescription"
         >
           <template #image>
-            <slot name="emptyImage" />
+            <slot name="emptyImage"></slot>
           </template>
         </AppEmpty>
       </template>
     </a-table>
   </div>
 </template>
-
-<script setup lang="ts">
-import type { TableProps } from "ant-design-vue";
-
-interface Props {
-  loading?: boolean;
-  dataSource?: any[];
-  columns?: any[];
-  emptyTitle?: string;
-  emptyDescription?: string;
-  hidePagination?: boolean;
-  pagination?: TableProps["pagination"];
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  loading: false,
-  dataSource: () => [],
-  columns: () => [],
-  hidePagination: false,
-});
-
-const paginationConfig = computed(() => {
-  if (props.hidePagination) return false;
-
-  return {
-    pageSize: 10,
-    showSizeChanger: true,
-    showTotal: (total: number) => `Total ${total} items`,
-    class: "custom-pagination",
-    ...(props.pagination || {}),
-  };
-});
-</script>
 
 <style scoped>
 .app-table-container {
