@@ -14,32 +14,26 @@ import {
   SettingOutlined,
   UsergroupAddOutlined,
   UserOutlined,
-  TagsOutlined,
 } from "@ant-design/icons-vue"
 import { theme } from "ant-design-vue"
-import { useNotification } from "~/composables/useNotification"
-import { useAuthStore } from "~/stores/auth"
+import { useNotification } from "@/composables/useNotification"
+import { useAuthStore } from "@/stores/auth"
+import { useThemeStore } from "@/stores/theme"
+import { useLocaleStore } from "@/stores/locale"
 
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 const { success, error } = useNotification()
 const router = useRouter()
-const colorMode = useColorMode()
 const { locale } = useI18n()
 
-const availableLocales = [
-  { code: "en", name: "English", flag: "https://flagcdn.com/w40/gb.png" },
-  { code: "uz", name: "O'zbek", flag: "https://flagcdn.com/w40/uz.png" },
-  { code: "ru", name: "Русский", flag: "https://flagcdn.com/w40/ru.png" },
-]
+// Locale handling
+const availableLocales = computed(() => localeStore.locales)
+const currentLocale = computed(() => localeStore.currentLocaleOption || availableLocales.value[0])
 
-const currentLocale = computed(
-  () =>
-    availableLocales.find(l => l.code === locale.value) || availableLocales[0],
-)
-
-const { setLocale } = useI18n()
 function setLocaleCode(code: string) {
-  setLocale(code as "en" | "uz" | "ru")
+  localeStore.setLocale(code as any)
 }
 
 const sidebarOpen = ref(true)
@@ -50,17 +44,17 @@ const windowWidth = ref(
 )
 
 const activeThemeAlgorithm = computed(() => {
-  return colorMode.value === "dark"
+  return themeStore.isDarkMode
     ? theme.darkAlgorithm
     : theme.defaultAlgorithm
 })
 
 function toggleTheme() {
-  colorMode.preference = colorMode.value === "dark" ? "light" : "dark"
+  themeStore.toggleTheme()
 }
 
 function toggleSidebar() {
-  if (import.meta.client && window.innerWidth >= 1024) {
+  if (window.innerWidth >= 1024) {
     isMiniSidebar.value = !isMiniSidebar.value
     if (typeof window !== "undefined") {
       localStorage.setItem("sidebarMini", JSON.stringify(isMiniSidebar.value))
@@ -101,6 +95,11 @@ function handleResize() {
 }
 
 onMounted(() => {
+  themeStore.initTheme()
+  
+  // Initialize locale store, which syncs with i18n
+  localeStore.initLocale()
+  
   if (typeof window !== "undefined") {
     lastWidth = window.innerWidth
 
@@ -181,7 +180,7 @@ onUnmounted(() => {
           ]"
         >
           <div class="flex-1">
-            <NuxtLink
+            <RouterLink
               to="/dashboard"
               class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
               active-class="bg-[#4880ff] text-white"
@@ -194,7 +193,7 @@ onUnmounted(() => {
             >
               <AppstoreOutlined class="text-lg" />
               <span v-if="!isMiniSidebar">{{ $t("sidebar.dashboard") }}</span>
-            </NuxtLink>
+            </RouterLink>
 
             <div class="pt-4">
               <div
@@ -204,7 +203,7 @@ onUnmounted(() => {
                 {{ $t("sidebar.main") }}
               </div>
 
-              <NuxtLink
+              <RouterLink
                 to="/products"
                 class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
                 active-class="bg-[#4880ff] text-white"
@@ -217,9 +216,9 @@ onUnmounted(() => {
               >
                 <DropboxOutlined class="text-lg" />
                 <span v-if="!isMiniSidebar">{{ $t("sidebar.products") }}</span>
-              </NuxtLink>
+              </RouterLink>
 
-              <NuxtLink
+              <RouterLink
                 to="/favorites"
                 class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
                 active-class="bg-[#4880ff] text-white"
@@ -227,9 +226,9 @@ onUnmounted(() => {
               >
                 <HeartOutlined class="text-lg" />
                 <span v-if="!isMiniSidebar">{{ $t("sidebar.favorites") }}</span>
-              </NuxtLink>
+              </RouterLink>
 
-              <NuxtLink
+              <RouterLink
                 to="/users"
                 class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
                 active-class="bg-[#4880ff] text-white"
@@ -242,22 +241,7 @@ onUnmounted(() => {
               >
                 <UsergroupAddOutlined class="text-lg" />
                 <span v-if="!isMiniSidebar">{{ $t("sidebar.users") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/categories"
-                class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/categories')
-                    ? 'bg-[#4880ff] text-white'
-                    : '',
-                ]"
-              >
-                <TagsOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.categories") }}</span>
-              </NuxtLink>
+              </RouterLink>
             </div>
           </div>
 
@@ -491,6 +475,7 @@ onUnmounted(() => {
 </template>
 
 <style>
+/* Global styles can be moved to a separate file or keep here if needed, but <style> without scoped is global */
 .dark .ant-form-item-label > label {
   color: #ffffff !important;
 }

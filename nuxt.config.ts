@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-
+  ssr: false,
   modules: [
     "@unocss/nuxt",
     "@pinia/nuxt",
@@ -37,9 +37,9 @@ export default defineNuxtConfig({
   ],
 
   vite: {
-    ssr: {
-      noExternal: ["ant-design-vue"],
-    },
+    // ssr: {
+    //   noExternal: ["ant-design-vue"],
+    // },
     build: {
       cssCodeSplit: true,
       rollupOptions: {
@@ -104,7 +104,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: "https://dummyjson.com",
+      apiBase: "https://dev-api-market.miit.uz/api",
     },
   },
 })

@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { useNotification } from "~/composables/useNotification"
-import { useAuthStore } from "~/stores/auth"
-
-definePageMeta({
-  layout: false,
-  middleware: "guest",
-})
+import { useNotification } from "@/composables/useNotification"
+import { useAuthStore } from "@/stores/auth"
+import { useRouter } from "vue-router"
+import { ref, reactive } from "vue"
 
 const authStore = useAuthStore()
 const { success, error } = useNotification()
@@ -83,35 +80,12 @@ async function handleOneIdLogin() {
     await authStore.loginWithOneId()
   } catch (err: any) {
     const errorMessage
-      = err.response?.data?.message || err.data?.message
+      = err.response?.data?.message
         || "OneID bilan ulanishda xatolik yuz berdi."
     error("OneID xatolik", errorMessage)
     oneIdLoading.value = false
   }
 }
-
-onMounted(async () => {
-  const route = useRoute()
-  const code = route.query.code as string
-
-  if (code) {
-    oneIdLoading.value = true
-    try {
-      await authStore.handleOneIdCallback(code)
-      if (authStore.isAuthenticated) {
-        success("Muvaffaqiyatli", "OneID orqali tizimga kirdingiz!")
-        await router.push("/dashboard")
-      }
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.data?.message || "OneID orqali kirish xatosi"
-      error("Xatolik", msg)
-    } finally {
-      oneIdLoading.value = false
-      // Remove code from URL
-      router.replace({ query: {} })
-    }
-  }
-})
 </script>
 
 <template>
@@ -324,6 +298,18 @@ onMounted(async () => {
               {{ $t("auth.signIn") }}
             </button>
 
+            <div class="text-center pt-2">
+              <span class="text-[16px] text-[#202224]/65 tracking-[-0.0643px]">
+                {{ $t("auth.noAccount") }}
+              </span>
+              <button
+                type="button"
+                class="ml-1 text-[16px] font-bold text-[#5a8cff] underline hover:text-[#4880ff] transition-colors border-none bg-transparent cursor-pointer"
+              >
+                {{ $t("auth.createAccount") }}
+              </button>
+            </div>
+
             <!-- Divider -->
             <div class="flex items-center gap-4 py-2">
               <div class="flex-1 h-[1px] bg-[#d8d8d8]" />
@@ -347,9 +333,21 @@ onMounted(async () => {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
+              <!-- OneID Icon -->
               <svg
                 v-else
                 xmlns="http://www.w3.org/2000/svg"
@@ -358,22 +356,15 @@ onMounted(async () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
               </svg>
               {{ $t("auth.oneIdLogin") }}
             </button>
-
-            <div class="text-center pt-2">
-              <span class="text-[16px] text-[#202224]/65 tracking-[-0.0643px]">
-                {{ $t("auth.noAccount") }}
-              </span>
-              <button
-                type="button"
-                class="ml-1 text-[16px] font-bold text-[#5a8cff] underline hover:text-[#4880ff] transition-colors border-none bg-transparent cursor-pointer"
-              >
-                {{ $t("auth.createAccount") }}
-              </button>
-            </div>
           </form>
         </div>
       </div>

@@ -52,6 +52,88 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
+    // OneID: Get authorization URL and redirect user to OneID
+    async loginWithOneId() {
+      this.loading = true
+      this.error = null
+      const config = useRuntimeConfig()
+
+      try {
+        console.log(window.location.origin);
+        const redirectUrl = `${window.location.origin}/login`
+        const data = await $fetch<any>("/auth/oauth/authorize/url", {
+          method: "GET",
+          baseURL: config.public.apiBase as string,
+          params: { redirect_url: redirectUrl },
+        })
+
+        // The API should return the OneID authorization URL
+        const authUrl = data?.data?.authorize_url || data?.authorize_url || data?.url || data?.data?.url
+        if (authUrl) {
+          window.location.href = authUrl
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "OneID login failed"
+        console.error("OneID login error:", err)
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // OneID: Handle the callback with authorization code
+    async handleOneIdCallback(code: string) {
+      this.loading = true
+      this.error = null
+      const config = useRuntimeConfig()
+
+      const tokenCookie = useCookie("auth_token", {
+        maxAge: 60 * 60 * 24 * 7,
+        secure: import.meta.env.PROD,
+        sameSite: "strict",
+      })
+
+      try {
+        const data = await $fetch<any>("/auth/oauth/login", {
+          method: "GET",
+          baseURL: config.public.apiBase as string,
+          params: { code },
+        })
+
+        if (data) {
+          // Extract token - handle different response shapes
+          const accessToken = data.token || data.access_token || data.data?.token || data.data?.access_token
+          const refreshTkn = data.refreshToken || data.refresh_token || data.data?.refreshToken || data.data?.refresh_token
+
+          if (accessToken) {
+            this.token = accessToken
+            this.isAuthenticated = true
+            tokenCookie.value = accessToken
+
+            // Set user info if available
+            this.user = {
+              id: data.id || data.data?.id || 0,
+              username: data.username || data.data?.username || "",
+              email: data.email || data.data?.email || "",
+              firstName: data.firstName || data.first_name || data.data?.firstName || data.data?.first_name || "",
+              lastName: data.lastName || data.last_name || data.data?.lastName || data.data?.last_name || "",
+              gender: data.gender || data.data?.gender || "",
+              image: data.image || data.data?.image || "",
+              token: accessToken,
+              accessToken,
+              refreshToken: refreshTkn,
+            }
+          }
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "OneID callback failed"
+        console.error("OneID callback error:", err)
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
     async logout() {
       const tokenCookie = useCookie("auth_token")
 
@@ -66,23 +148,20 @@ export const useAuthStore = defineStore("auth", {
     async fetchUser(skipNavigation = false) {
       this.loading = true
       this.error = null
-      const config = useRuntimeConfig()
       const tokenCookie = useCookie("auth_token")
 
+      // Skip fetching user if we already have user data (e.g., from OneID login)
+      if (this.user && this.isAuthenticated) {
+        this.loading = false
+        return
+      }
+
       try {
-        const userData = await $fetch<AuthUser>("/auth/me", {
-          method: "GET",
-          baseURL: config.public.apiBase as string,
-          headers: {
-            Authorization: `Bearer ${tokenCookie.value}`,
-          },
-        })
-
-        this.user = userData
-        this.isAuthenticated = true
-
-        if (tokenCookie.value && !this.token) {
+        // With OneID, we don't have a /auth/me endpoint
+        // If we have a token but no user, just mark as authenticated
+        if (tokenCookie.value && !this.user) {
           this.token = tokenCookie.value as string
+          this.isAuthenticated = true
         }
       } catch (err) {
         this.error = err instanceof Error ? err.message : "Failed to fetch user"
@@ -99,21 +178,21 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async refreshToken() {
+    async refreshAuthToken() {
       this.loading = true
       this.error = null
       const config = useRuntimeConfig()
       const tokenCookie = useCookie("auth_token")
 
       try {
-        if (!tokenCookie.value) {
-          throw new Error("No token available")
+        if (!this.user?.refreshToken) {
+          throw new Error("No refresh token available")
         }
 
-        const response = await $fetch<RefreshTokenResponse>("/auth/refresh", {
-          method: "POST",
-          body: { refreshToken: tokenCookie.value },
+        const response = await $fetch<RefreshTokenResponse>("/auth/refresh-token", {
+          method: "GET",
           baseURL: config.public.apiBase as string,
+          params: { refresh_token: this.user.refreshToken },
         })
 
         this.token = response.token
@@ -143,14 +222,12 @@ export const useAuthStore = defineStore("auth", {
 
       if (tokenCookie.value) {
         this.token = tokenCookie.value as string
+        this.isAuthenticated = true
 
-        await this.fetchUser(true)
-
+        // If we already have user data, skip fetch
         if (!this.user) {
-          console.warn("Token validation failed during initialization")
-          tokenCookie.value = null
-          this.token = null
-          this.isAuthenticated = false
+          // With OneID we don't have /auth/me, so just trust the token
+          this.isAuthenticated = true
         }
       }
     },
