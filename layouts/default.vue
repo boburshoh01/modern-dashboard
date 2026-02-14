@@ -206,13 +206,13 @@ onUnmounted(() => {
 
               <NuxtLink
                 to="/products"
-                class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
                 active-class="bg-[#4880ff] text-white"
                 :class="[
                   isMiniSidebar ? 'justify-center px-0' : 'px-4',
                   $route.path.startsWith('/products')
-                    ? 'bg-[#4880ff] text-white'
-                    : '',
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
                 ]"
               >
                 <DropboxOutlined class="text-lg" />
@@ -221,9 +221,14 @@ onUnmounted(() => {
 
               <NuxtLink
                 to="/favorites"
-                class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
                 active-class="bg-[#4880ff] text-white"
-                :class="[isMiniSidebar ? 'justify-center px-0' : 'px-4']"
+                :class="[
+                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
+                  $route.path.startsWith('/favorites')
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
+                ]"
               >
                 <HeartOutlined class="text-lg" />
                 <span v-if="!isMiniSidebar">{{ $t("sidebar.favorites") }}</span>
@@ -231,13 +236,13 @@ onUnmounted(() => {
 
               <NuxtLink
                 to="/users"
-                class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
                 active-class="bg-[#4880ff] text-white"
                 :class="[
                   isMiniSidebar ? 'justify-center px-0' : 'px-4',
                   $route.path.startsWith('/users')
-                    ? 'bg-[#4880ff] text-white'
-                    : '',
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
                 ]"
               >
                 <UsergroupAddOutlined class="text-lg" />
@@ -246,17 +251,64 @@ onUnmounted(() => {
 
               <NuxtLink
                 to="/categories"
-                class="flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
                 active-class="bg-[#4880ff] text-white"
                 :class="[
                   isMiniSidebar ? 'justify-center px-0' : 'px-4',
                   $route.path.startsWith('/categories')
-                    ? 'bg-[#4880ff] text-white'
-                    : '',
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
                 ]"
               >
                 <TagsOutlined class="text-lg" />
                 <span v-if="!isMiniSidebar">{{ $t("sidebar.categories") }}</span>
+              </NuxtLink>
+
+              <NuxtLink
+                to="/brands"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
+                active-class="bg-[#4880ff] text-white"
+                :class="[
+                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
+                  $route.path.startsWith('/brands')
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
+                ]"
+              >
+                <AppstoreOutlined class="text-lg" />
+                <span v-if="!isMiniSidebar">{{ $t("sidebar.brands") }}</span>
+              </NuxtLink>
+
+              <NuxtLink
+                to="/countries"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
+                active-class="bg-[#4880ff] text-white"
+                :class="[
+                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
+                  $route.path.startsWith('/countries')
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
+                ]"
+              >
+                <span v-if="isMiniSidebar" class="text-lg">C</span>
+                <span v-else class="text-lg w-5">C</span>
+                <span v-if="!isMiniSidebar">{{ $t("sidebar.countries") }}</span>
+              </NuxtLink>
+
+              <NuxtLink
+                to="/organizations"
+                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
+                active-class="bg-[#4880ff] text-white"
+                :class="[
+                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
+                  $route.path.startsWith('/organizations')
+                    ? ''
+                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
+                ]"
+              >
+                <span v-if="isMiniSidebar" class="text-lg">O</span>
+                <span v-else class="text-lg w-5">O</span>
+                <span v-if="!isMiniSidebar">{{ $t("sidebar.organizations") }}</span>
               </NuxtLink>
             </div>
           </div>

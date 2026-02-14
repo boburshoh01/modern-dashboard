@@ -98,7 +98,7 @@ export const useCategoriesStore = defineStore("categories", {
                 const formData = new FormData()
                 formData.append("files", file)
 
-                const { data } = await useApi().post<any>("/upload", formData, {
+                const { data } = await useApi().post<any>("/upload/file", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },

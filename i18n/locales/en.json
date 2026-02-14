@@ -7,6 +7,9 @@
     "inbox": "Inbox",
     "users": "Users",
     "categories": "Categories",
+    "brands": "Brands",
+    "countries": "Countries",
+    "organizations": "Organizations",
     "stock": "Product Stock",
     "pages": "Pages",
     "pricing": "Pricing",
@@ -101,6 +104,69 @@
       "update": "Update Product",
       "create": "Create Product",
       "addNew": "Add New Product"
+    }
+  },
+  "brands": {
+    "title": "Brands",
+    "addBrand": "Add Brand",
+    "search": "Search brands...",
+    "editBrand": "Edit Brand",
+    "logo": "Logo",
+    "name": "Name",
+    "status": "Status",
+    "action": "Action",
+    "form": {
+      "name": "Brand Name",
+      "logo": "Logo",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "messages": {
+      "created": "Brand created successfully",
+      "updated": "Brand updated successfully",
+      "deleted": "Brand deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this brand?",
+      "createError": "Failed to create brand",
+      "updateError": "Failed to update brand",
+      "deleteError": "Failed to delete brand",
+      "validationName": "Name is required"
+    }
+  },
+  "countries": {
+    "title": "Countries",
+    "addCountry": "Add Country",
+    "search": "Search countries...",
+    "editCountry": "Edit Country",
+    "code": "Code",
+    "name": "Name",
+    "action": "Action",
+    "messages": {
+      "created": "Country created successfully",
+      "updated": "Country updated successfully",
+      "createError": "Failed to create country",
+      "updateError": "Failed to update country",
+      "validationCode": "Code is required",
+      "validationName": "Name is required"
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "search": "Search organizations...",
+    "editOrganization": "Edit Organization",
+    "tin": "TIN",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "action": "Action",
+    "form": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "messages": {
+      "updated": "Organization updated successfully",
+      "updateError": "Failed to update organization"
     }
   },
   "favorites": {

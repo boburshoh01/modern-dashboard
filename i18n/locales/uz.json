@@ -7,6 +7,9 @@
     "inbox": "Xabarlar",
     "users": "Foydalanuvchilar",
     "categories": "Kategoriyalar",
+    "brands": "Brendlar",
+    "countries": "Davlatlar",
+    "organizations": "Tashkilotlar",
     "stock": "Mahsulot Ombori",
     "pages": "Sahifalar",
     "pricing": "Narxlar",
@@ -101,6 +104,69 @@
       "update": "Mahsulotni Yangilash",
       "create": "Mahsulot Yaratish",
       "addNew": "Yangi Mahsulot Qo'shish"
+    }
+  },
+  "brands": {
+    "title": "Brendlar",
+    "addBrand": "Brend Qo'shish",
+    "search": "Brendlarni qidirish...",
+    "editBrand": "Brendni Tahrirlash",
+    "logo": "Logo",
+    "name": "Nomi",
+    "status": "Holat",
+    "action": "Amal",
+    "form": {
+      "name": "Brend Nomi",
+      "logo": "Logo",
+      "status": "Holat",
+      "active": "Faol",
+      "inactive": "Faol emas"
+    },
+    "messages": {
+      "created": "Brend muvaffaqiyatli yaratildi",
+      "updated": "Brend muvaffaqiyatli yangilandi",
+      "deleted": "Brend muvaffaqiyatli o'chirildi",
+      "deleteConfirm": "Ushbu brendni o'chirishga ishonchingiz komilmi?",
+      "createError": "Brend yaratishda xatolik",
+      "updateError": "Brendni yangilashda xatolik",
+      "deleteError": "Brendni o'chirishda xatolik",
+      "validationName": "Nom kiritish majburiy"
+    }
+  },
+  "countries": {
+    "title": "Davlatlar",
+    "addCountry": "Davlat Qo'shish",
+    "search": "Davlatlarni qidirish...",
+    "editCountry": "Davlatni Tahrirlash",
+    "code": "Kod",
+    "name": "Nomi",
+    "action": "Amal",
+    "messages": {
+      "created": "Davlat muvaffaqiyatli yaratildi",
+      "updated": "Davlat muvaffaqiyatli yangilandi",
+      "createError": "Davlat yaratishda xatolik",
+      "updateError": "Davlatni yangilashda xatolik",
+      "validationCode": "Kod kiritish majburiy",
+      "validationName": "Nom kiritish majburiy"
+    }
+  },
+  "organizations": {
+    "title": "Tashkilotlar",
+    "search": "Tashkilotlarni qidirish...",
+    "editOrganization": "Tashkilotni Tahrirlash",
+    "tin": "STIR (INN)",
+    "name": "Nomi",
+    "phone": "Telefon",
+    "email": "Email",
+    "status": "Holat",
+    "action": "Amal",
+    "form": {
+      "active": "Faol",
+      "inactive": "Faol emas"
+    },
+    "messages": {
+      "updated": "Tashkilot muvaffaqiyatli yangilandi",
+      "updateError": "Tashkilotni yangilashda xatolik"
     }
   },
   "favorites": {

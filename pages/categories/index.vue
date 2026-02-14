@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined, SearchOutlined } from "@ant-design/icons-vue"
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, GlobalOutlined } from "@ant-design/icons-vue"
 import { useCategoriesStore } from "~/stores/categories"
 import type { Category, CategoryCreateDto, CategoryUpdateDto, CategoryName } from "~/types/category"
 import type { TablePaginationConfig } from 'ant-design-vue';
@@ -17,7 +17,6 @@ const isModalVisible = ref(false)
 const modalTitle = ref("Add Category")
 const isEditing = ref(false)
 const editingId = ref<number | null>(null)
-const uploadLoading = ref(false)
 
 // Pagination & Search
 const searchQuery = ref("")
@@ -44,6 +43,22 @@ const formState = reactive<CategoryCreateDto>({
   parent_id: 0,
 })
 
+// Localization
+const { locale } = useI18n()
+const expandLanguage = ref(false)
+
+const supportedLanguages = [
+  { code: 'uz', name: "O'zbek" },
+  { code: 'ru', name: "Русский" },
+  { code: 'en', name: "English" },
+  { code: 'kk', name: "Qoraqalpoq" },
+]
+
+function getLocalizedName(nameObj: CategoryName) {
+  if (!nameObj) return ""
+  return nameObj[locale.value as keyof CategoryName] || nameObj.uz || nameObj.en || ""
+}
+
 // Table columns
 const columns = [
   {
@@ -53,19 +68,14 @@ const columns = [
     width: 100,
   },
   {
-    title: "Name (UZ)",
-    dataIndex: ["name", "uz"],
-    key: "name_uz",
-  },
-  {
-    title: "Name (RU)",
-    dataIndex: ["name", "ru"],
-    key: "name_ru",
+    title: "Name",
+    key: "name",
   },
   {
     title: "Status",
     dataIndex: "is_active",
     key: "is_active",
+    width: 100,
   },
   {
     title: "Parent",
@@ -114,6 +124,7 @@ function handleAdd() {
   editingId.value = null
   resetForm()
   modalTitle.value = "Add Category"
+  expandLanguage.value = false
   isModalVisible.value = true
 }
 
@@ -127,6 +138,7 @@ function handleEdit(record: Category) {
     parent_id: record.parent_id,
   })
   modalTitle.value = "Edit Category"
+  expandLanguage.value = false
   isModalVisible.value = true
 }
 
@@ -162,19 +174,6 @@ async function handleOk() {
   }
 }
 
-async function handleFileUpload(file: File) {
-  uploadLoading.value = true
-  const filename = await categoriesStore.uploadFile(file)
-  uploadLoading.value = false
-  
-  if (filename) {
-    formState.logo = filename
-    success("Success", "File uploaded successfully")
-  } else {
-    showError("Error", "Failed to upload file")
-  }
-  return false // Prevent default upload behavior
-}
 </script>
 
 <template>
@@ -200,7 +199,7 @@ async function handleFileUpload(file: File) {
 
     <a-table 
       :columns="columns" 
-      :data-source="categoriesStore.categories" 
+      :data-source="categoriesStore.categories || []" 
       :loading="categoriesStore.loading"
       :pagination="pagination"
       row-key="id"
@@ -208,16 +207,17 @@ async function handleFileUpload(file: File) {
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'logo'">
-           <!-- Assuming logo is a filename, we need a base URL. For now verifying if it's a full URL or just filename.
-                If it is just a filename, you might need to prepend base URL.
-           -->
-          <a-image 
-            v-if="record.logo"
-            :width="50" 
-            :src="record.logo" 
-            alt="Logo" 
-          />
-          <span v-else class="text-gray-400">No Logo</span>
+           <a-image 
+             v-if="record.logo"
+             :width="50" 
+             :src="record.logo" 
+             alt="Logo" 
+           />
+           <span v-else class="text-gray-400">No Logo</span>
+        </template>
+        
+        <template v-else-if="column.key === 'name'">
+          <span class="font-medium">{{ getLocalizedName(record.name) }}</span>
         </template>
         
         <template v-else-if="column.key === 'is_active'">
@@ -245,31 +245,36 @@ async function handleFileUpload(file: File) {
       :title="modalTitle"
       @ok="handleOk"
       :confirmLoading="categoriesStore.loading"
-      width="700px"
+      width="600px"
     >
       <a-form layout="vertical">
-        <a-tabs default-active-key="uz">
-          <a-tab-pane key="uz" tab="O'zbek">
-            <a-form-item label="Name (UZ)" required>
-              <a-input v-model:value="formState.name.uz" />
-            </a-form-item>
-          </a-tab-pane>
-          <a-tab-pane key="ru" tab="Русский">
-            <a-form-item label="Name (RU)" required>
-              <a-input v-model:value="formState.name.ru" />
-            </a-form-item>
-          </a-tab-pane>
-          <a-tab-pane key="en" tab="English">
-            <a-form-item label="Name (EN)" required>
-              <a-input v-model:value="formState.name.en" />
-            </a-form-item>
-          </a-tab-pane>
-          <a-tab-pane key="kk" tab="Qoraqalpoq">
-            <a-form-item label="Name (KK)" required>
-              <a-input v-model:value="formState.name.kk" />
-            </a-form-item>
-          </a-tab-pane>
-        </a-tabs>
+        <a-form-item label="Name" required>
+           <div class="relative">
+             <a-input 
+               v-model:value="formState.name[locale as keyof CategoryName]" 
+               :placeholder="`Name (${locale.toUpperCase()})`"
+             >
+               <template #suffix>
+                 <a-tooltip title="Toggle Languages">
+                   <GlobalOutlined 
+                     class="cursor-pointer transition-colors hover:text-[#4880ff]" 
+                     :class="{ 'text-[#4880ff]': expandLanguage, 'text-gray-400': !expandLanguage }"
+                     @click="expandLanguage = !expandLanguage" 
+                   />
+                 </a-tooltip>
+               </template>
+             </a-input>
+             
+             <div v-if="expandLanguage" class="mt-3 p-3 bg-gray-50 dark:bg-dark-card border rounded-lg space-y-3 transition-all duration-300">
+                <div v-for="lang in supportedLanguages" :key="lang.code">
+                  <div v-if="lang.code !== locale" class="mb-1">
+                    <label class="text-xs text-gray-500 block mb-1">{{ lang.name }} ({{ lang.code.toUpperCase() }})</label>
+                    <a-input v-model:value="formState.name[lang.code as keyof CategoryName]" />
+                  </div>
+                </div>
+             </div>
+           </div>
+        </a-form-item>
 
         <a-form-item label="Parent Category">
            <a-select 
@@ -284,33 +289,20 @@ async function handleFileUpload(file: File) {
                :value="cat.id"
                :disabled="cat.id === editingId"
              >
-               {{ cat.name.uz }}
+               {{ getLocalizedName(cat.name) }}
              </a-select-option>
            </a-select>
         </a-form-item>
 
         <a-form-item label="Logo">
-           <div class="flex items-center gap-4">
-             <a-upload 
-               :before-upload="handleFileUpload" 
-               :show-upload-list="false"
-               name="files"
-             >
-               <a-button :loading="uploadLoading">
-                 <UploadOutlined /> Click to Upload
-               </a-button>
-             </a-upload>
-             
-             <div v-if="formState.logo" class="flex items-center gap-2">
-               <a-image :width="60" :src="formState.logo" />
-               <span class="text-xs text-gray-500 truncate max-w-[200px]">{{ formState.logo }}</span>
-             </div>
-           </div>
+           <AppFileUpload v-model:value="formState.logo" />
         </a-form-item>
 
-        <a-form-item label="Status">
-          <a-switch v-model:checked="formState.is_active" />
-          <span class="ml-2">{{ formState.is_active ? 'Active' : 'Inactive' }}</span>
+        <a-form-item label="Status" class="mb-0">
+          <div class="flex items-center gap-2">
+            <a-switch v-model:checked="formState.is_active" />
+            <span>{{ formState.is_active ? 'Active' : 'Inactive' }}</span>
+          </div>
         </a-form-item>
       </a-form>
     </a-modal>
