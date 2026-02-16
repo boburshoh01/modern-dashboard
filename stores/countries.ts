@@ -1,6 +1,12 @@
 import { defineStore } from "pinia"
 import type { Country, CountryCreateDto } from "~/types/country"
 
+function getErrorMessage(err: unknown): string {
+    if (err instanceof Error) return err.message
+    if (typeof err === "string") return err
+    return "An unknown error occurred"
+}
+
 export const useCountriesStore = defineStore("countries", {
     state: () => ({
         countries: [] as Country[],
@@ -14,7 +20,7 @@ export const useCountriesStore = defineStore("countries", {
             this.loading = true
             this.error = null
             try {
-                const { data } = await useApi().get<any>("/country/list")
+                const { data } = await useApi().get<Country[] | { items: Country[], total: number }>("/country/list")
                 if (data && Array.isArray(data)) {
                     this.countries = data
                     this.total = data.length
@@ -26,8 +32,8 @@ export const useCountriesStore = defineStore("countries", {
                     this.countries = []
                     this.total = 0
                 }
-            } catch (err: any) {
-                this.error = err.message || "Failed to fetch countries"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to fetch countries"
                 console.error("Error fetching countries:", err)
                 this.countries = []
             } finally {
@@ -42,8 +48,8 @@ export const useCountriesStore = defineStore("countries", {
                 await useApi().post("/country/create", payload)
                 await this.fetchCountries()
                 return true
-            } catch (err: any) {
-                this.error = err.message || "Failed to create country"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to create country"
                 console.error("Error creating country:", err)
                 return false
             } finally {
@@ -59,8 +65,8 @@ export const useCountriesStore = defineStore("countries", {
                 await useApi().post("/country/update", payload)
                 await this.fetchCountries()
                 return true
-            } catch (err: any) {
-                this.error = err.message || "Failed to update country"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to update country"
                 console.error("Error updating country:", err)
                 return false
             } finally {

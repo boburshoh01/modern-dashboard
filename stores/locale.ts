@@ -59,5 +59,5 @@ export const useLocaleStore = defineStore("locale", {
     key: "locale",
     storage: typeof window !== "undefined" ? localStorage : undefined,
     paths: ["currentLocale"],
-  },
+  } as any,
 })

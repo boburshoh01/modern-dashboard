@@ -16,7 +16,7 @@ export const useThemeStore = defineStore("theme", {
   actions: {
     setMode(mode: ThemeMode) {
       this.mode = mode
-      this.applyTheme()
+        ; (this as any).applyTheme()
     },
 
     toggleTheme() {
@@ -27,7 +27,7 @@ export const useThemeStore = defineStore("theme", {
       } else {
         this.mode = "system"
       }
-      this.applyTheme()
+      ; (this as any).applyTheme()
     },
 
     applyTheme() {
@@ -52,13 +52,13 @@ export const useThemeStore = defineStore("theme", {
     },
 
     initTheme() {
-      this.applyTheme()
+      ; (this as any).applyTheme()
 
       if (typeof window !== "undefined") {
         window.matchMedia("(prefers-color-scheme: dark)")
           .addEventListener("change", () => {
             if (this.mode === "system") {
-              this.applyTheme()
+              ; (this as any).applyTheme()
             }
           })
       }
@@ -69,5 +69,5 @@ export const useThemeStore = defineStore("theme", {
     key: "theme",
     storage: typeof window !== "undefined" ? localStorage : undefined,
     paths: ["mode"],
-  },
+  } as any,
 })

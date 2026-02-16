@@ -1,4 +1,4 @@
-import type { AuthUser, LoginCredentials, RefreshTokenResponse } from "~/types"
+import type { AuthUser, LoginCredentials, RefreshTokenResponse, OAuthAuthorizeResponse, OAuthLoginResponse } from "~/types"
 import { defineStore } from "pinia"
 
 export const useAuthStore = defineStore("auth", {
@@ -60,7 +60,7 @@ export const useAuthStore = defineStore("auth", {
 
       try {
         const redirectUrl = `${window.location.origin}/login`
-        const data = await $fetch<any>("/auth/oauth/authorize/url", {
+        const data = await $fetch<OAuthAuthorizeResponse>("/auth/oauth/authorize/url", {
           method: "GET",
           baseURL: config.public.apiBase as string,
           params: { redirect_url: redirectUrl },
@@ -90,7 +90,7 @@ export const useAuthStore = defineStore("auth", {
         // We might want to specify a redirect URL if the backend supports it,
         // otherwise it might default to /callback
         const redirectUrl = `${window.location.origin}/callback`
-        const data = await $fetch<any>("/oauth/external/authorize/url", {
+        const data = await $fetch<OAuthAuthorizeResponse>("/oauth/external/authorize/url", {
           method: "GET",
           baseURL: config.public.apiBase as string,
           params: {
@@ -125,7 +125,7 @@ export const useAuthStore = defineStore("auth", {
       })
 
       try {
-        const data = await $fetch<any>("/auth/oauth/login", {
+        const data = await $fetch<OAuthLoginResponse>("/auth/oauth/login", {
           method: "GET",
           baseURL: config.public.apiBase as string,
           params: { code },
@@ -154,7 +154,7 @@ export const useAuthStore = defineStore("auth", {
       })
 
       try {
-        const data = await $fetch<any>("/oauth/external/login", {
+        const data = await $fetch<OAuthLoginResponse>("/oauth/external/login", {
           method: "POST",
           baseURL: config.public.apiBase as string,
           params: {
@@ -174,7 +174,7 @@ export const useAuthStore = defineStore("auth", {
     },
 
     // Helper to handle successful auth response
-    handleAuthResponse(data: any, tokenCookie: any) {
+    handleAuthResponse(data: OAuthLoginResponse, tokenCookie: Ref<string | null | undefined>) {
       if (data) {
         // Extract token - handle different response shapes
         const accessToken = data.token || data.access_token || data.data?.token || data.data?.access_token

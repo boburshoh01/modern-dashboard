@@ -1,21 +1,4 @@
 <script setup lang="ts">
-import {
-  AppstoreOutlined,
-  BellOutlined,
-  BulbOutlined,
-  CloseOutlined,
-  DownOutlined,
-  DropboxOutlined,
-  HeartOutlined,
-  HistoryOutlined,
-  LogoutOutlined,
-  MenuOutlined,
-  SearchOutlined,
-  SettingOutlined,
-  UsergroupAddOutlined,
-  UserOutlined,
-  TagsOutlined,
-} from "@ant-design/icons-vue"
 import { theme } from "ant-design-vue"
 import { useNotification } from "~/composables/useNotification"
 import { useAuthStore } from "~/stores/auth"
@@ -24,23 +7,6 @@ const authStore = useAuthStore()
 const { success, error } = useNotification()
 const router = useRouter()
 const colorMode = useColorMode()
-const { locale } = useI18n()
-
-const availableLocales = [
-  { code: "en", name: "English", flag: "https://flagcdn.com/w40/gb.png" },
-  { code: "uz", name: "O'zbek", flag: "https://flagcdn.com/w40/uz.png" },
-  { code: "ru", name: "Русский", flag: "https://flagcdn.com/w40/ru.png" },
-]
-
-const currentLocale = computed(
-  () =>
-    availableLocales.find(l => l.code === locale.value) || availableLocales[0],
-)
-
-const { setLocale } = useI18n()
-function setLocaleCode(code: string) {
-  setLocale(code as "en" | "uz" | "ru")
-}
 
 const sidebarOpen = ref(true)
 const isMiniSidebar = ref(false)
@@ -80,8 +46,6 @@ async function handleLogout() {
   }
 }
 
-let lastWidth = 0
-
 function handleResize() {
   if (typeof window === "undefined")
     return
@@ -102,14 +66,12 @@ function handleResize() {
 
 onMounted(() => {
   if (typeof window !== "undefined") {
-    lastWidth = window.innerWidth
-
     const savedMiniState = localStorage.getItem("sidebarMini")
     if (savedMiniState !== null) {
       isMiniSidebar.value = JSON.parse(savedMiniState)
     }
 
-    if (lastWidth < 1024) {
+    if (window.innerWidth < 1024) {
       sidebarOpen.value = false
     } else {
       sidebarOpen.value = true
@@ -133,201 +95,25 @@ onUnmounted(() => {
     }"
   >
     <div
-      class="min-h-screen bg-[#f5f6fa] dark:bg-dark-main flex relative transition-colors duration-300"
+      class="min-h-screen bg-background dark:bg-dark-main flex relative transition-colors duration-300"
     >
+      <!-- Mobile overlay -->
       <div
         v-if="sidebarOpen && windowWidth < 1024"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[45] lg:hidden transition-opacity"
         @click="sidebarOpen = false"
-      ></div>
+      />
 
-      <aside
-        class="bg-white dark:bg-dark-card fixed left-0 top-0 h-full z-50 border-r border-gray-200 dark:border-dark-border overflow-y-auto transition-all duration-300"
-        :class="[
-          sidebarOpen ? (isMiniSidebar ? 'w-20' : 'w-64') : '-translate-x-full',
-          !sidebarOpen && 'lg:translate-x-0',
-        ]"
-      >
-        <div
-          class="p-6 border-b border-gray-200 dark:border-dark-border flex items-center justify-between"
-          :class="[
-            isMiniSidebar ? 'justify-center' : '',
-          ]"
-        >
-          <div class="flex items-center">
-            <h1
-              v-if="!isMiniSidebar"
-              class="text-xl font-extrabold flex items-center gap-2"
-            >
-              <span class="text-[#4880ff] text-xl">Made In</span>
-              <span class="text-[#202224] dark:text-white text-xl">Uzbekistan</span>
-            </h1>
-            <span v-else class="text-[#4880ff] text-2xl font-extrabold">M</span>
-          </div>
+      <!-- Sidebar -->
+      <AppSidebar
+        :sidebar-open="sidebarOpen"
+        :is-mini-sidebar="isMiniSidebar"
+        :window-width="windowWidth"
+        @close="sidebarOpen = false"
+        @logout="handleLogout"
+      />
 
-          <button
-            v-if="windowWidth < 1024"
-            class="p-2 -mr-2 text-gray-400 hover:text-[#4880ff] transition-colors"
-            @click="sidebarOpen = false"
-          >
-            <CloseOutlined class="text-xl" />
-          </button>
-        </div>
-
-        <nav
-          class="p-4 space-y-1 flex flex-col h-[calc(100%-97px)]"
-          :class="[
-            isMiniSidebar ? 'px-2' : 'p-4',
-          ]"
-        >
-          <div class="flex-1">
-            <NuxtLink
-              to="/dashboard"
-              class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-              active-class="bg-[#4880ff] text-white"
-              :class="[
-                isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                $route.path === '/dashboard'
-                  ? ''
-                  : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-              ]"
-            >
-              <AppstoreOutlined class="text-lg" />
-              <span v-if="!isMiniSidebar">{{ $t("sidebar.dashboard") }}</span>
-            </NuxtLink>
-
-            <div class="pt-4">
-              <div
-                v-if="!isMiniSidebar"
-                class="px-4 py-2 text-xs font-bold text-[#202224] dark:text-dark-text-secondary opacity-60 tracking-wider uppercase"
-              >
-                {{ $t("sidebar.main") }}
-              </div>
-
-              <NuxtLink
-                to="/products"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/products')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <DropboxOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.products") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/favorites"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/favorites')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <HeartOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.favorites") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/users"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/users')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <UsergroupAddOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.users") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/categories"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/categories')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <TagsOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.categories") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/brands"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/brands')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <AppstoreOutlined class="text-lg" />
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.brands") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/countries"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/countries')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <span v-if="isMiniSidebar" class="text-lg">C</span>
-                <span v-else class="text-lg w-5">C</span>
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.countries") }}</span>
-              </NuxtLink>
-
-              <NuxtLink
-                to="/organizations"
-                class="flex items-center gap-3 py-3 rounded-lg font-semibold text-sm transition-colors"
-                active-class="bg-[#4880ff] text-white"
-                :class="[
-                  isMiniSidebar ? 'justify-center px-0' : 'px-4',
-                  $route.path.startsWith('/organizations')
-                    ? ''
-                    : 'text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main',
-                ]"
-              >
-                <span v-if="isMiniSidebar" class="text-lg">O</span>
-                <span v-else class="text-lg w-5">O</span>
-                <span v-if="!isMiniSidebar">{{ $t("sidebar.organizations") }}</span>
-              </NuxtLink>
-            </div>
-          </div>
-
-          <div
-            class="pt-4 border-t border-gray-200 dark:border-dark-border mt-auto"
-          >
-            <button
-              class="w-full flex items-center gap-3 py-3 rounded-lg text-[#202224] dark:text-dark-text-secondary hover:bg-gray-50 dark:hover:bg-dark-main font-semibold text-sm cursor-pointer transition-colors"
-              :class="[isMiniSidebar ? 'justify-center px-0' : 'px-4']"
-              @click="handleLogout"
-            >
-              <LogoutOutlined class="text-lg" />
-              <span v-if="!isMiniSidebar">{{ $t("sidebar.logout") }}</span>
-            </button>
-          </div>
-        </nav>
-      </aside>
-
+      <!-- Main content -->
       <div
         class="flex-1 flex flex-col min-h-screen transition-all duration-300 min-w-0"
         :class="[
@@ -335,202 +121,17 @@ onUnmounted(() => {
           !sidebarOpen && 'lg:ml-0',
         ]"
       >
-        <header
-          class="bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border sticky top-0 z-40 transition-colors duration-300"
-        >
-          <div
-            class="px-4 sm:px-6 py-4 flex items-center justify-between gap-4"
-          >
-            <div class="flex items-center gap-4 flex-1">
-              <button
-                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-main transition-colors shrink-0"
-                @click="toggleSidebar"
-              >
-                <MenuOutlined class="text-xl dark:text-white" />
-              </button>
-
-              <div class="flex-1 max-w-[380px] hidden sm:block">
-                <a-input
-                  v-model:value="searchQuery"
-                  placeholder="Search"
-                  class="search-input rounded-full h-[38px]"
-                  :bordered="false"
-                >
-                  <template #prefix>
-                    <SearchOutlined class="text-gray-400" />
-                  </template>
-                </a-input>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-4 sm:gap-6">
-              <a-button
-                type="text"
-                shape="circle"
-                size="large"
-                class="flex items-center justify-center transition-colors"
-                @click="toggleTheme"
-              >
-                <template #icon>
-                  <BulbOutlined
-                    class="text-xl text-[#202224] dark:text-white opacity-70"
-                  />
-                </template>
-              </a-button>
-
-              <a-badge :count="6" :offset="[-5, 5]" color="#f93c65">
-                <a-button
-                  type="text"
-                  shape="circle"
-                  size="large"
-                  class="flex items-center justify-center transition-colors"
-                >
-                  <template #icon>
-                    <BellOutlined
-                      class="text-xl text-[#202224] dark:text-white opacity-70"
-                    />
-                  </template>
-                </a-button>
-              </a-badge>
-
-              <a-dropdown :trigger="['click']">
-                <a-button
-                  type="text"
-                  class="hidden sm:flex items-center gap-2 px-2 transition-colors"
-                >
-                  <img
-                    :src="currentLocale.flag"
-                    :alt="currentLocale.name"
-                    class="w-6 h-auto rounded-sm"
-                  />
-                  <span
-                    class="font-semibold text-[#646464] dark:text-dark-text-secondary"
-                  >{{ currentLocale.name }}</span>
-                  <DownOutlined
-                    class="text-[10px] text-[#646464] dark:text-dark-text-secondary"
-                  />
-                </a-button>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item
-                      v-for="loc in availableLocales"
-                      :key="loc.code"
-                      @click="setLocaleCode(loc.code)"
-                    >
-                      <div class="flex items-center gap-2">
-                        <img :src="loc.flag" class="w-5 h-auto rounded-sm" />
-                        <span>{{ loc.name }}</span>
-                      </div>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-
-              <a-dropdown :trigger="['click']">
-                <div class="flex items-center gap-3 cursor-pointer group">
-                  <a-avatar
-                    :src="
-                      authStore.user?.image
-                        || 'https://i.pravatar.cc/150?img=32'
-                    "
-                    :size="44"
-                    class="border-2 border-white dark:border-dark-border shadow-sm transition-colors group-hover:border-[#4880ff]"
-                  >
-                    <template #icon>
-                      <UserOutlined />
-                    </template>
-                  </a-avatar>
-                  <div class="hidden md:block text-left">
-                    <p
-                      class="text-sm font-bold text-[#404040] dark:text-white leading-tight"
-                    >
-                      {{ authStore.user?.firstName || "Moni" }}
-                      {{ authStore.user?.lastName || "Roy" }}
-                    </p>
-                    <p
-                      class="text-xs font-semibold text-[#565656] dark:text-dark-text-secondary"
-                    >
-                      Admin
-                    </p>
-                  </div>
-                  <div
-                    class="hidden md:flex w-5 h-5 items-center justify-center rounded-full border border-gray-300 dark:border-dark-border transition-colors group-hover:border-[#4880ff]"
-                  >
-                    <DownOutlined
-                      class="text-[10px] text-[#565656] dark:text-dark-text-secondary group-hover:text-[#4880ff]"
-                    />
-                  </div>
-                </div>
-                <template #overlay>
-                  <a-menu
-                    class="min-w-[200px] p-2 rounded-xl shadow-xl dark:bg-dark-card border-none"
-                  >
-                    <div
-                      class="px-4 py-3 mb-2 border-b border-gray-100 dark:border-dark-border lg:hidden"
-                    >
-                      <p class="text-sm font-bold dark:text-white">
-                        {{ authStore.user?.firstName }}
-                        {{ authStore.user?.lastName }}
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        Admin
-                      </p>
-                    </div>
-                    <a-menu-item
-                      key="manage"
-                      class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
-                    >
-                      <template #icon>
-                        <UserOutlined class="text-blue-500" />
-                      </template>
-                      <span
-                        class="font-semibold text-gray-700 dark:text-gray-200"
-                      >Manage Account</span>
-                    </a-menu-item>
-                    <a-menu-item
-                      key="password"
-                      class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
-                    >
-                      <template #icon>
-                        <SettingOutlined class="text-purple-500" />
-                      </template>
-                      <span
-                        class="font-semibold text-gray-700 dark:text-gray-200"
-                      >Change Password</span>
-                    </a-menu-item>
-                    <a-menu-item
-                      key="activity"
-                      class="rounded-lg py-2 hover:bg-blue-50 dark:hover:bg-dark-main"
-                    >
-                      <template #icon>
-                        <HistoryOutlined class="text-cyan-500" />
-                      </template>
-                      <span
-                        class="font-semibold text-gray-700 dark:text-gray-200"
-                      >Activity Log</span>
-                    </a-menu-item>
-                    <a-menu-divider
-                      class="my-2 border-gray-100 dark:border-dark-border"
-                    />
-                    <a-menu-item
-                      key="logout"
-                      class="rounded-lg py-2 hover:bg-red-50 dark:hover:bg-dark-main"
-                      @click="handleLogout"
-                    >
-                      <template #icon>
-                        <LogoutOutlined class="text-red-500" />
-                      </template>
-                      <span class="font-semibold text-red-500">Log out</span>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </div>
-          </div>
-        </header>
+        <!-- Header -->
+        <AppHeader
+          :search-query="searchQuery"
+          @toggle-sidebar="toggleSidebar"
+          @toggle-theme="toggleTheme"
+          @logout="handleLogout"
+          @update:search-query="searchQuery = $event"
+        />
 
         <main
-          class="flex-1 p-4 sm:p-6 lg:p-8 bg-[#f5f6fa] dark:bg-dark-main transition-colors duration-300"
+          class="flex-1 p-4 sm:p-6 lg:p-8 bg-background dark:bg-dark-main transition-colors duration-300"
         >
           <div class="mb-6">
             <AppBreadcrumbs />

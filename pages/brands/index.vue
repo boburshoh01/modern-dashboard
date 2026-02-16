@@ -2,7 +2,7 @@
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons-vue"
 import { useBrandsStore } from "~/stores/brands"
 import { useNotification } from "~/composables/useNotification"
-import type { BrandCreateDto } from "~/types/brand"
+import type { Brand, BrandCreateDto } from "~/types/brand"
 import type { TablePaginationConfig } from 'ant-design-vue';
 
 definePageMeta({
@@ -12,6 +12,7 @@ definePageMeta({
 
 const brandsStore = useBrandsStore()
 const { success, error: showError } = useNotification()
+const { confirm } = useAppConfirm()
 const { t } = useI18n()
 
 // State
@@ -70,7 +71,7 @@ const columns = computed(() => [
 ])
 
 async function fetchData() {
-  const params: Record<string, any> = {
+  const params: Record<string, string | number> = {
     page: currentPage.value,
     page_size: pageSize.value,
   }
@@ -132,7 +133,7 @@ function handleAdd() {
   isModalVisible.value = true
 }
 
-function handleEdit(record: any) {
+function handleEdit(record: Brand) {
   isEditing.value = true
   editingId.value = record.id
   Object.assign(formState, {
@@ -145,11 +146,15 @@ function handleEdit(record: any) {
 }
 
 async function handleDelete(id: number) {
-  if (confirm(t('brands.messages.deleteConfirm'))) {
-    const ok = await brandsStore.deleteBrand(id)
-    if (ok) success(t('common.success'), t('brands.messages.deleted'))
-    else showError(t('common.error'), t('brands.messages.deleteError'))
-  }
+  confirm({
+    title: t('brands.messages.deleteConfirm'),
+    type: "danger",
+    onOk: async () => {
+      const ok = await brandsStore.deleteBrand(id)
+      if (ok) success(t('common.success'), t('brands.messages.deleted'))
+      else showError(t('common.error'), t('brands.messages.deleteError'))
+    },
+  })
 }
 
 function resetForm() {
@@ -185,8 +190,8 @@ async function handleOk() {
 <template>
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h1 class="text-3xl font-bold text-[#202224] dark:text-white">{{ t('brands.title') }}</h1>
-      <a-button type="primary" size="large" class="bg-[#4880ff] h-11 px-6 rounded-lg font-semibold flex items-center gap-2 shadow-sm border-none" @click="handleAdd">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('brands.title') }}</h1>
+      <a-button type="primary" size="large" class="btn-primary h-11 px-6 flex items-center gap-2 shadow-sm border-none" @click="handleAdd">
         <PlusOutlined /> {{ t('brands.addBrand') }}
       </a-button>
     </div>

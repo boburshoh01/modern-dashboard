@@ -79,7 +79,7 @@ const columns = computed(() => [
 ])
 
 async function fetchData() {
-  const params: Record<string, any> = {
+  const params: Record<string, string | number> = {
     page: currentPage.value,
     page_size: pageSize.value,
     start: (currentPage.value - 1) * pageSize.value,
@@ -212,12 +212,13 @@ async function handleOk() {
       </div>
     </div>
 
-    <a-table 
+    <AppTable 
       :columns="columns" 
       :data-source="organizationsStore.organizations || []" 
       :loading="organizationsStore.loading"
       :pagination="pagination"
       row-key="id"
+      :scroll="{ x: 1200 }"
       @change="handleTableChange"
     >
       <template #bodyCell="{ column, record }">
@@ -235,7 +236,7 @@ async function handleOk() {
           </div>
         </template>
       </template>
-    </a-table>
+    </AppTable>
 
     <!-- Modal -->
     <a-modal

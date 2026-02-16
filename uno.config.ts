@@ -23,18 +23,19 @@ export default defineConfig({
   theme: {
     colors: {
       primary: {
-        50: "#f0f9ff",
-        100: "#e0f2fe",
-        200: "#bae6fd",
-        300: "#7dd3fc",
-        400: "#38bdf8",
-        500: "#0ea5e9",
-        600: "#0284c7",
-        700: "#0369a1",
-        800: "#075985",
-        900: "#0c4a6e",
-        950: "#082f49",
+        50: "#eef2ff",
+        100: "#e0e7ff",
+        200: "#c7d2fe",
+        300: "#a5b4fc",
+        400: "#818cf8",
+        500: "#4880ff", // Main Brand Color
+        600: "#3a6fcc", // Hover
+        700: "#2c5ab3", // Active
+        800: "#1e40af",
+        900: "#1e3a8a",
+        950: "#172554",
       },
+      // Keep existing dark theme
       dark: {
         main: "#1b2431",
         card: "#273142",
@@ -45,11 +46,14 @@ export default defineConfig({
           secondary: "#8a99af",
         },
       },
+      // Add semantic mappings if needed, or just use primary-500
+      background: "#f5f6fa",
+      surface: "#ffffff",
     },
   },
   shortcuts: [
-    ["btn-primary", "bg-[#4880ff] hover:bg-[#3a6fcc] text-white font-bold rounded-lg transition-colors"],
-    ["card-base", "bg-white dark:bg-dark-card rounded-2xl shadow-sm"],
+    ["btn-primary", "bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-lg transition-colors"],
+    ["card-base", "bg-surface dark:bg-dark-card rounded-2xl shadow-sm"],
   ],
   rules: [],
 })

@@ -1,136 +1,106 @@
 import type { Category, Product, ProductResponse } from "~/types"
 import { defineStore } from "pinia"
 
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error)
-    return err.message
-  if (typeof err === "string")
-    return err
-  return "An unknown error occurred"
-}
-
-export const useProductsStore = defineStore("products", {
-  state: () => ({
-    products: [] as Product[],
-    total: 0,
-    skip: 0,
-    limit: 10,
-    loading: false,
-    error: null as string | null,
-    currentProduct: null as Product | null,
-    categories: [] as Category[],
-  }),
-
-  actions: {
-    async fetchProducts(params: { limit?: number; skip?: number; q?: string; category?: string } = {}) {
-      this.loading = true
-      this.error = null
-      const { get } = useApi()
-
-      try {
-        let url = "/products"
-
-        if (params.q) {
-          url = `/products/search?q=${params.q}`
-        } else if (params.category) {
-          url = `/products/category/${params.category}`
-        }
-
-        const queryParams: any = {
-          limit: params.limit || this.limit,
-          skip: params.skip !== undefined ? params.skip : this.skip,
-        }
-
-        const response = await get<ProductResponse>(url, { params: queryParams })
-
-        this.products = response.data.products
-        this.total = response.data.total
-        this.skip = response.data.skip
-        this.limit = response.data.limit
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to fetch products"
-        console.error("Error fetching products:", err)
-        throw err
-      } finally {
-        this.loading = false
+export const useProductsStore = defineStore("products", () => {
+  const {
+    items: products,
+    total,
+    loading,
+    error,
+    createItem,
+    updateItem,
+    deleteItem,
+  } = useCrud<Product>({
+    apiEndpoint: "/products",
+    transformResponse: (data) => {
+      // Handle standard response or specific product response structure
+      if (data && data.products) {
+        return { items: data.products as Product[], total: Number(data.total) }
       }
-    },
+      return { items: [], total: 0 }
+    }
+  })
 
-    async fetchProductById(id: number) {
-      this.loading = true
-      this.error = null
-      const { get } = useApi()
+  const currentProduct = ref<Product | null>(null)
+  const categories = ref<Category[]>([])
+  const skip = ref(0)
+  const limit = ref(10)
+  const api = useApi()
 
-      try {
-        const response = await get<Product>(`/products/${id}`)
-        this.currentProduct = response.data
-        return response.data
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to fetch product"
-        throw err
-      } finally {
-        this.loading = false
+  // Actions
+  const fetchProducts = async (params: { limit?: number; skip?: number; q?: string; category?: string } = {}) => {
+    // Let's rely on manual fetch for complex cases to be safe, reusing the state.
+    loading.value = true
+    error.value = null
+
+    try {
+      let url = "/products"
+
+      if (params.q) {
+        url = `/products/search`
+      } else if (params.category) {
+        url = `/products/category/${params.category}`
       }
-    },
 
-    async fetchCategories() {
-      const { get } = useApi()
-      try {
-        const response = await get<Category[]>("/products/categories")
-        this.categories = response.data
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to fetch categories"
-        console.error("Error fetching categories:", err)
-        throw err
+      const queryParams: Record<string, string | number> = {
+        limit: params.limit || limit.value,
+        skip: params.skip !== undefined ? params.skip : skip.value,
       }
-    },
 
-    async addProduct(productData: Partial<Product>) {
-      this.loading = true
-      const { post } = useApi()
-      try {
-        const response = await post<Product>("/products/add", productData)
-        this.products.unshift(response.data)
-        return response.data
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to add product"
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
+      if (params.q) queryParams.q = params.q // Search query
 
-    async updateProduct(id: number, productData: Partial<Product>) {
-      this.loading = true
-      const { put } = useApi()
-      try {
-        const response = await put<Product>(`/products/${id}`, productData)
-        const index = this.products.findIndex(p => p.id === id)
-        if (index !== -1) {
-          this.products[index] = response.data
-        }
-        this.currentProduct = response.data
-        return response.data
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to update product"
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
+      const response = await api.get<ProductResponse>(url, { params: queryParams })
 
-    async deleteProduct(id: number) {
-      this.loading = true
-      const { delete: del } = useApi()
-      try {
-        await del(`/products/${id}`)
-        this.products = this.products.filter(p => p.id !== id)
-      } catch (err: unknown) {
-        this.error = getErrorMessage(err) || "Failed to delete product"
-        throw err
-      } finally {
-        this.loading = false
-      }
-    },
-  },
+      products.value = response.data.products
+      total.value = response.data.total
+      skip.value = response.data.skip
+      limit.value = response.data.limit
+    } catch (err: unknown) {
+      error.value = (err as Error).message || "Failed to fetch products"
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const fetchProductById = async (id: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await api.get<Product>(`/products/${id}`)
+      currentProduct.value = response.data
+      return response.data
+    } catch (err: unknown) {
+      error.value = (err as Error).message || "Failed to fetch product"
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const fetchCategories = async () => {
+    // Keep as is
+    try {
+      const response = await api.get<Category[]>("/products/categories")
+      categories.value = response.data
+    } catch (err: unknown) {
+      console.error("Error fetching categories:", err)
+    }
+  }
+
+  return {
+    products,
+    total,
+    skip,
+    limit,
+    loading,
+    error,
+    currentProduct,
+    categories,
+    fetchProducts,
+    fetchProductById,
+    fetchCategories,
+    addProduct: createItem,
+    updateProduct: updateItem,
+    deleteProduct: deleteItem
+  }
 })

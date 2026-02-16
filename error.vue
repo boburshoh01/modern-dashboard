@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 const props = defineProps({
   error: {
     type: Object,
@@ -8,20 +10,20 @@ const props = defineProps({
 
 const errorTitle = computed(() => {
   if (props.error.statusCode === 404)
-    return "Looks like you've got lost...."
+    return t('error.notFoundTitle')
   if (props.error.statusCode === 403)
-    return "Access Denied"
-  return "Something Went Wrong"
+    return t('error.forbiddenTitle')
+  return t('error.defaultTitle')
 })
 
 const errorMessage = computed(() => {
   if (props.error.statusCode === 404) {
-    return "Oops! The page you're looking for doesn't exist. It might have been moved or deleted."
+    return t('error.notFoundMessage')
   }
   if (props.error.statusCode === 403) {
-    return "Sorry, you don't have permission to access this page. Please contact your administrator."
+    return t('error.forbiddenMessage')
   }
-  return "An unexpected error occurred. Our team has been notified and is working on a fix."
+  return t('error.defaultMessage')
 })
 
 const handleError = () => clearError({ redirect: "/dashboard" })
@@ -189,7 +191,7 @@ const handleError = () => clearError({ redirect: "/dashboard" })
         </svg>
       </div>
 
-      <h2 class="text-2xl font-bold text-[#202224] mb-8">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
         {{ errorTitle }}
       </h2>
 
@@ -205,10 +207,10 @@ const handleError = () => clearError({ redirect: "/dashboard" })
           type="primary"
           block
           size="large"
-          class="h-[60px] rounded-[12px] bg-[#4880ff] border-none text-lg font-bold shadow-lg shadow-blue-500/30 hover:bg-[#3d70eb] transition-all"
+          class="h-[60px] rounded-[12px] bg-primary-500 border-none text-lg font-bold shadow-lg shadow-blue-500/30 hover:bg-primary-600 transition-all"
           @click="handleError"
         >
-          Back to Dashboard
+          {{ t('error.backToDashboard') }}
         </a-button>
       </div>
     </div>

@@ -4,7 +4,7 @@
 
 /* Custom global styles */
 body {
-  @apply bg-[#f5f6fa] text-[#202224] dark:bg-dark-main dark:text-white transition-colors duration-300;
+  @apply bg-background text-[#202224] dark:bg-dark-main dark:text-white transition-colors duration-300;
   font-family: "Nunito Sans", sans-serif;
 }
 
@@ -32,8 +32,11 @@ ul {
 /* Ant Design customization */
 :root {
   --ant-primary-color: #4880ff;
+  /* primary-500 */
   --ant-primary-color-hover: #3a6fcc;
+  /* primary-600 */
   --ant-primary-color-active: #2c5ab3;
+  /* primary-700 */
 }
 
 /* Ensure Ant Design components inherit font */

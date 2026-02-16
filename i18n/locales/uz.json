@@ -25,7 +25,50 @@
   },
   "header": {
     "search": "Qidirish",
-    "admin": "Admin"
+    "admin": "Admin",
+    "manageAccount": "Hisobni boshqarish",
+    "changePassword": "Parolni o'zgartirish",
+    "activityLog": "Faoliyat jurnali"
+  },
+  "categories": {
+    "title": "Kategoriyalar",
+    "addCategory": "Kategoriya Qo'shish",
+    "editCategory": "Kategoriyani Tahrirlash",
+    "search": "Kategoriyalarni qidirish...",
+    "logo": "Logo",
+    "name": "Nomi",
+    "parent": "Ota kategoriya",
+    "status": "Holat",
+    "actions": "Amallar",
+    "noLogo": "Logo yo'q",
+    "parentCategory": "Ota kategoriya",
+    "selectParent": "Tanlang",
+    "none": "Yo'q",
+    "messages": {
+      "created": "Kategoriya muvaffaqiyatli yaratildi",
+      "updated": "Kategoriya muvaffaqiyatli yangilandi",
+      "deleted": "Kategoriya muvaffaqiyatli o'chirildi",
+      "deleteConfirm": "Ushbu kategoriyani o'chirishga ishonchingiz komilmi?",
+      "createError": "Kategoriya yaratishda xatolik",
+      "updateError": "Kategoriyani yangilashda xatolik",
+      "deleteError": "Kategoriyani o'chirishda xatolik"
+    }
+  },
+  "error": {
+    "notFoundTitle": "Adashib qoldingiz shekilli....",
+    "notFoundText": "Kechirasiz, siz qidirayotgan sahifa mavjud emas yoki ko'chirilgan.",
+    "notFoundMessage": "Voy! Siz qidirayotgan sahifa mavjud emas. U ko'chirilgan yoki o'chirilgan bo'lishi mumkin.",
+    "accessDeniedTitle": "Ruxsat berilmadi",
+    "accessDeniedText": "Sizda bu sahifaga kirish huquqi yo'q.",
+    "forbiddenTitle": "Ruxsat berilmadi",
+    "forbiddenMessage": "Kechirasiz, sizda bu sahifaga kirish huquqi yo'q. Iltimos, administratoringizga murojaat qiling.",
+    "genericTitle": "Xatolik yuz berdi",
+    "genericText": "Kutilmagan xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko'ring.",
+    "defaultTitle": "Xatolik yuz berdi",
+    "defaultMessage": "Kutilmagan xatolik yuz berdi. Jamoamiz xabardor qilindi va tuzatish ustida ishlayapti.",
+    "goHome": "Bosh sahifa",
+    "goBack": "Orqaga qaytish",
+    "backToDashboard": "Boshqaruv paneliga qaytish"
   },
   "auth": {
     "loginTitle": "Hisobga kirish",
@@ -242,7 +285,12 @@
     "loading": "Yuklanmoqda...",
     "save": "Saqlash",
     "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "confirmTitle": "Ishonchingiz komilmi?",
     "deleteConfirm": "Haqiqatan ham o'chirmoqchimisiz?",
+    "noLogo": "Logo yo'q",
+    "totalItems": "Jami {total} ta",
     "status": {
       "active": "Faol",
       "inactive": "Faol emas",

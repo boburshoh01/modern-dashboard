@@ -134,9 +134,93 @@ export interface AuthUser {
   refreshToken?: string
 }
 
+export interface UserDetail {
+  id: number
+  firstName: string
+  lastName: string
+  maidenName?: string
+  age?: number
+  gender?: string
+  email: string
+  phone?: string
+  username: string
+  password?: string
+  birthDate?: string
+  image?: string
+  bloodGroup?: string
+  height?: number
+  weight?: number
+  eyeColor?: string
+  hair?: {
+    color: string
+    type: string
+  }
+  address?: {
+    address: string
+    city: string
+    state: string
+    stateCode: string
+    postalCode: string
+    country: string
+  }
+  university?: string
+  company?: {
+    name: string
+    department: string
+    title: string
+  }
+  role?: "admin" | "moderator" | "user"
+}
+
+export interface UserProfile {
+  user: UserDetail
+}
+
 export interface RefreshTokenResponse {
   token: string
   refreshToken: string
+}
+
+/** Response from OAuth authorize URL endpoints (OneID, Google) */
+export interface OAuthAuthorizeResponse {
+  data?: {
+    authorize_url?: string
+    url?: string
+  }
+  authorize_url?: string
+  url?: string
+}
+
+/** Response from OAuth login/callback endpoints */
+export interface OAuthLoginResponse {
+  id?: number
+  username?: string
+  email?: string
+  firstName?: string
+  first_name?: string
+  lastName?: string
+  last_name?: string
+  gender?: string
+  image?: string
+  token?: string
+  access_token?: string
+  refreshToken?: string
+  refresh_token?: string
+  data?: {
+    id?: number
+    username?: string
+    email?: string
+    firstName?: string
+    first_name?: string
+    lastName?: string
+    last_name?: string
+    gender?: string
+    image?: string
+    token?: string
+    access_token?: string
+    refreshToken?: string
+    refresh_token?: string
+  }
 }
 
 export interface ApiResponse<T> {
@@ -164,7 +248,7 @@ export interface ValidationRule {
   min?: number
   max?: number
   pattern?: RegExp
-  validator?: (rule: any, value: any) => Promise<void>
+  validator?: (rule: ValidationRule, value: unknown) => Promise<void>
 }
 
 export interface ValidationError {
@@ -173,7 +257,7 @@ export interface ValidationError {
 }
 
 export interface FormState {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface StoreState {

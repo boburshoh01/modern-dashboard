@@ -2,7 +2,7 @@
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, GlobalOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons-vue"
 import { useCategoriesStore } from "~/stores/categories"
 import { useNotification } from "~/composables/useNotification"
-import type { CategoryCreateDto, CategoryName } from "~/types/category"
+import type { Category, CategoryCreateDto, CategoryName } from "~/types/category"
 import type { TablePaginationConfig } from 'ant-design-vue';
 
 definePageMeta({
@@ -12,11 +12,12 @@ definePageMeta({
 
 const categoriesStore = useCategoriesStore()
 const { success, error: showError } = useNotification()
+const { confirm } = useAppConfirm()
 const { t, locale } = useI18n()
 
 // State
 const isModalVisible = ref(false)
-const modalTitle = ref("Add Category")
+const modalTitle = ref(t('categories.addCategory'))
 const isEditing = ref(false)
 const editingId = ref<number | null>(null)
 
@@ -64,37 +65,37 @@ function getLocalizedName(nameObj: CategoryName) {
 }
 
 // Table columns
-const columns = [
+const columns = computed(() => [
   {
-    title: "Logo",
+    title: t('categories.logo'),
     dataIndex: "logo",
     key: "logo",
     width: 100,
   },
   {
-    title: "Name",
+    title: t('categories.name'),
     key: "name",
   },
   {
-    title: "Parent",
+    title: t('categories.parent'),
     dataIndex: "parent",
     key: "parent",
   },
   {
-    title: "Status",
+    title: t('categories.status'),
     dataIndex: "is_active",
     key: "is_active",
     width: 100,
   },
   {
-    title: "Actions",
+    title: t('categories.actions'),
     key: "actions",
     width: 150,
   },
-]
+])
 
 async function fetchData() {
-  const params: Record<string, any> = {
+  const params: Record<string, string | number> = {
     page: currentPage.value,
     page_size: pageSize.value,
   }
@@ -152,12 +153,12 @@ function handleAdd() {
   isEditing.value = false
   editingId.value = null
   resetForm()
-  modalTitle.value = "Add Category"
+  modalTitle.value = t('categories.addCategory')
   expandLanguage.value = false
   isModalVisible.value = true
 }
 
-function handleEdit(record: any) {
+function handleEdit(record: Category) {
   isEditing.value = true
   editingId.value = record.id
   Object.assign(formState, {
@@ -166,17 +167,21 @@ function handleEdit(record: any) {
     name: { ...record.name },
     parent_id: record.parent_id,
   })
-  modalTitle.value = "Edit Category"
+  modalTitle.value = t('categories.editCategory')
   expandLanguage.value = false
   isModalVisible.value = true
 }
 
-async function handleDelete(id: number) {
-  if (confirm("Are you sure you want to delete this category?")) {
-    const ok = await categoriesStore.deleteCategory(id)
-    if (ok) success("Success", "Category deleted successfully")
-    else showError("Error", "Failed to delete category")
-  }
+function handleDelete(id: number) {
+  confirm({
+    title: t('categories.messages.deleteConfirm'),
+    type: "danger",
+    onOk: async () => {
+      const ok = await categoriesStore.deleteCategory(id)
+      if (ok) success(t('common.success'), t('categories.messages.deleted'))
+      else showError(t('common.error'), t('categories.messages.deleteError'))
+    },
+  })
 }
 
 function resetForm() {
@@ -195,11 +200,11 @@ async function handleOk() {
   }
 
   if (ok) {
-    success("Success", isEditing.value ? "Category updated" : "Category created")
+    success(t('common.success'), isEditing.value ? t('categories.messages.updated') : t('categories.messages.created'))
     isModalVisible.value = false
     resetForm()
   } else {
-    showError("Error", isEditing.value ? "Failed to update" : "Failed to create")
+    showError(t('common.error'), isEditing.value ? t('categories.messages.updateError') : t('categories.messages.createError'))
   }
 }
 
@@ -208,31 +213,31 @@ async function handleOk() {
 <template>
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h1 class="text-3xl font-bold text-[#202224] dark:text-white">Categories</h1>
-      <a-button type="primary" size="large" class="bg-[#4880ff] h-11 px-6 rounded-lg font-semibold flex items-center gap-2 shadow-sm border-none" @click="handleAdd">
-        <PlusOutlined /> Add Category
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('categories.title') }}</h1>
+      <a-button type="primary" size="large" class="btn-primary h-11 px-6 flex items-center gap-2 shadow-sm border-none" @click="handleAdd">
+        <PlusOutlined /> {{ t('categories.addCategory') }}
       </a-button>
     </div>
 
     <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm flex flex-wrap items-center gap-4 border border-gray-100 dark:border-dark-border">
       <div class="flex items-center gap-2 whitespace-nowrap">
         <FilterOutlined class="text-gray-400 dark:text-gray-500" />
-        <span class="font-bold text-[#202224] dark:text-white">{{ t("common.filterBy") }}</span>
+        <span class="font-bold text-gray-900 dark:text-white">{{ t("common.filterBy") }}</span>
       </div>
 
       <a-select
         v-model:value="filters.key"
         placeholder="Field"
-        class="w-full sm:w-32 rounded-lg bg-[#F5F6FA] dark:bg-dark-main"
+        class="w-full sm:w-32 rounded-lg bg-background dark:bg-dark-main"
         :bordered="false"
       >
-        <a-select-option value="name">Name</a-select-option>
+        <a-select-option value="name">{{ t('categories.name') }}</a-select-option>
       </a-select>
 
       <a-input
         v-model:value="filters.value"
         placeholder="Value"
-        class="w-full sm:w-48 bg-[#F5F6FA] dark:bg-dark-main dark:text-white border-none rounded-lg"
+        class="w-full sm:w-48 bg-background dark:bg-dark-main dark:text-white border-none rounded-lg"
       />
 
       <a-button
@@ -245,7 +250,7 @@ async function handleOk() {
       <div class="sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
         <a-input
           v-model:value="searchQuery"
-          placeholder="Search categories..."
+          :placeholder="t('categories.search')"
           class="search-input rounded-full w-full sm:w-64 h-[38px]"
           :bordered="false"
           allow-clear
@@ -273,7 +278,7 @@ async function handleOk() {
              :src="record.logo" 
              alt="Logo" 
            />
-           <span v-else class="text-gray-400">No Logo</span>
+           <span v-else class="text-gray-400">{{ t('categories.noLogo') }}</span>
         </template>
         
         <template v-else-if="column.key === 'name'">
@@ -282,7 +287,7 @@ async function handleOk() {
         
         <template v-else-if="column.key === 'is_active'">
           <a-tag :color="record.is_active ? 'green' : 'red'">
-            {{ record.is_active ? 'Active' : 'Inactive' }}
+            {{ record.is_active ? t('common.status.active') : t('common.status.inactive') }}
           </a-tag>
         </template>
 
@@ -308,17 +313,17 @@ async function handleOk() {
       width="600px"
     >
       <a-form layout="vertical">
-        <a-form-item label="Name" required>
+        <a-form-item :label="t('categories.name')" required>
            <div class="relative">
              <a-input 
                v-model:value="formState.name[locale as keyof CategoryName]" 
-               :placeholder="`Name (${locale.toUpperCase()})`"
+               :placeholder="`${t('categories.name')} (${locale.toUpperCase()})`"
              >
                <template #suffix>
-                 <a-tooltip title="Toggle Languages">
+                 <a-tooltip :title="$t('categories.name')">
                    <GlobalOutlined 
-                     class="cursor-pointer transition-colors hover:text-[#4880ff]" 
-                     :class="{ 'text-[#4880ff]': expandLanguage, 'text-gray-400': !expandLanguage }"
+                     class="cursor-pointer transition-colors hover:text-primary-500" 
+                     :class="{ 'text-primary-500': expandLanguage, 'text-gray-400': !expandLanguage }"
                      @click="expandLanguage = !expandLanguage" 
                    />
                  </a-tooltip>
@@ -336,13 +341,13 @@ async function handleOk() {
            </div>
         </a-form-item>
 
-        <a-form-item label="Parent Category">
+        <a-form-item :label="t('categories.parentCategory')">
            <a-select 
              v-model:value="formState.parent_id" 
-             placeholder="Select parent"
+             :placeholder="t('categories.selectParent')"
              allow-clear
            >
-             <a-select-option :value="0">None</a-select-option>
+             <a-select-option :value="0">{{ t('categories.none') }}</a-select-option>
              <a-select-option 
                v-for="cat in categoriesStore.categories" 
                :key="cat.id" 
@@ -354,14 +359,14 @@ async function handleOk() {
            </a-select>
         </a-form-item>
 
-        <a-form-item label="Logo">
+        <a-form-item :label="t('categories.logo')">
            <AppFileUpload v-model:value="formState.logo" />
         </a-form-item>
 
-        <a-form-item label="Status" class="mb-0">
+        <a-form-item :label="t('categories.status')" class="mb-0">
           <div class="flex items-center gap-2">
             <a-switch v-model:checked="formState.is_active" />
-            <span>{{ formState.is_active ? 'Active' : 'Inactive' }}</span>
+            <span>{{ formState.is_active ? t('common.status.active') : t('common.status.inactive') }}</span>
           </div>
         </a-form-item>
       </a-form>

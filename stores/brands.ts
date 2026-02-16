@@ -1,6 +1,12 @@
 import { defineStore } from "pinia"
 import type { Brand, BrandCreateDto, BrandUpdateDto, BrandParams, BrandResponse } from "~/types/brand"
 
+function getErrorMessage(err: unknown): string {
+    if (err instanceof Error) return err.message
+    if (typeof err === "string") return err
+    return "An unknown error occurred"
+}
+
 export const useBrandsStore = defineStore("brands", {
     state: () => ({
         brands: [] as Brand[],
@@ -34,8 +40,8 @@ export const useBrandsStore = defineStore("brands", {
                         this.total = 0
                     }
                 }
-            } catch (err: any) {
-                this.error = err.message || "Failed to fetch brands"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to fetch brands"
                 console.error("Error fetching brands:", err)
                 this.brands = []
             } finally {
@@ -50,8 +56,8 @@ export const useBrandsStore = defineStore("brands", {
                 await useApi().post("/brand/create", payload)
                 await this.fetchBrands()
                 return true
-            } catch (err: any) {
-                this.error = err.message || "Failed to create brand"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to create brand"
                 console.error("Error creating brand:", err)
                 return false
             } finally {
@@ -66,8 +72,8 @@ export const useBrandsStore = defineStore("brands", {
                 await useApi().put(`/brand/update/${id}`, payload)
                 await this.fetchBrands()
                 return true
-            } catch (err: any) {
-                this.error = err.message || "Failed to update brand"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to update brand"
                 console.error("Error updating brand:", err)
                 return false
             } finally {
@@ -82,8 +88,8 @@ export const useBrandsStore = defineStore("brands", {
                 await useApi().delete(`/brand/delete/${id}`)
                 await this.fetchBrands()
                 return true
-            } catch (err: any) {
-                this.error = err.message || "Failed to delete brand"
+            } catch (err: unknown) {
+                this.error = getErrorMessage(err) || "Failed to delete brand"
                 console.error("Error deleting brand:", err)
                 return false
             } finally {

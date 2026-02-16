@@ -42,8 +42,12 @@ onMounted(async () => {
     } else {
       throw new Error("Autentifikatsiya amalga oshmadi")
     }
-  } catch (err: any) {
-    const msg = err.response?.data?.message || err.data?.message || err.message || "Kirish xatosi"
+  } catch (err: unknown) {
+    const errObj = err as Record<string, unknown>
+    const response = errObj?.response as Record<string, unknown> | undefined
+    const responseData = response?.data as Record<string, unknown> | undefined
+    const errData = errObj?.data as Record<string, unknown> | undefined
+    const msg = (responseData?.message as string) || (errData?.message as string) || (err instanceof Error ? err.message : "") || "Kirish xatosi"
     errorMessage.value = msg
     error("Xatolik", msg)
     setTimeout(() => router.push("/login"), 3000)
@@ -56,7 +60,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-[#4880ff] relative overflow-hidden flex items-center justify-center">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-       <div class="absolute inset-0 bg-gradient-to-br from-[#4880ff] to-[#3a6fcc]" />
+       <div class="absolute inset-0 bg-gradient-to-br from-[#4880ff] to-[#3a6fcc]"></div>
     </div>
 
     <div class="relative z-10 text-center">

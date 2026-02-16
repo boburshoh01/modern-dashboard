@@ -1,4 +1,4 @@
-import type { PaginationParams, User, UserResponse } from "~/types"
+import type { ApiResponse, PaginationParams, UserDetail, UserProfile } from "~/types"
 import { defineStore } from "pinia"
 
 function getErrorMessage(err: unknown): string {
@@ -11,39 +11,49 @@ function getErrorMessage(err: unknown): string {
 
 export const useUsersStore = defineStore("users", {
   state: () => ({
-    users: [] as User[],
+    users: [] as UserDetail[],
     total: 0,
     loading: false,
     error: null as string | null,
   }),
 
   actions: {
-    async fetchUsers(params: PaginationParams & { key?: string; value?: string } = {}) {
+    async fetchUsers(_params: PaginationParams & { key?: string; value?: string } = {}) {
       this.loading = true
       this.error = null
       const { get } = useApi()
 
       try {
-        let endpoint = "/users"
-        const queryParams = new URLSearchParams()
+        // const queryParams = new URLSearchParams()
 
-        if (params.limit)
-          queryParams.append("limit", params.limit.toString())
-        if (params.skip)
-          queryParams.append("skip", params.skip.toString())
+        // if (params.limit)
+        //   queryParams.append("limit", params.limit.toString())
+        // if (params.skip)
+        //   queryParams.append("skip", params.skip.toString())
 
-        if (params.search) {
-          endpoint = "/users/search"
-          queryParams.append("q", params.search)
-        } else if (params.key && params.value) {
-          endpoint = "/users/filter"
-          queryParams.append("key", params.key)
-          queryParams.append("value", params.value)
+        // if (params.search) {
+        //   endpoint = "/users/search"
+        //   queryParams.append("q", params.search)
+        // } else if (params.key && params.value) {
+        //   endpoint = "/users/filter"
+        //   queryParams.append("key", params.key)
+        //   queryParams.append("value", params.value)
+        // }
+
+        // Fetching single user profile as requested
+        const response = await get<ApiResponse<UserProfile>>("/user/profile")
+
+        // Wrap the single user in an array to display in the table
+        // response.data is ApiResponse<UserProfile>
+        // response.data.data is UserProfile
+        // response.data.data.user is UserDetail
+        if (response.data && response.data.data && response.data.data.user) {
+          this.users = [response.data.data.user]
+          this.total = 1
+        } else {
+          this.users = []
+          this.total = 0
         }
-
-        const response = await get<UserResponse>(`${endpoint}?${queryParams.toString()}`)
-        this.users = response.data.users
-        this.total = response.data.total
       } catch (err: unknown) {
         this.error = getErrorMessage(err) || "Failed to fetch users"
         throw err
@@ -56,8 +66,8 @@ export const useUsersStore = defineStore("users", {
       this.loading = true
       const { get } = useApi()
       try {
-        const response = await get<User>(`/users/${id}`)
-        return response.data
+        const response = await get<ApiResponse<UserDetail>>(`/users/${id}`)
+        return response.data.data
       } catch (err: unknown) {
         this.error = getErrorMessage(err) || "Failed to fetch user"
         throw err
@@ -66,14 +76,14 @@ export const useUsersStore = defineStore("users", {
       }
     },
 
-    async addUser(user: Partial<User>) {
+    async addUser(user: Partial<UserDetail>) {
       this.loading = true
       const { post } = useApi()
       try {
-        const response = await post<User>("/users/add", user)
-        this.users.unshift(response.data)
+        const response = await post<ApiResponse<UserDetail>>("/users/add", user)
+        this.users.unshift(response.data.data)
         this.total++
-        return response.data
+        return response.data.data
       } catch (err: unknown) {
         this.error = getErrorMessage(err) || "Failed to add user"
         throw err
@@ -82,16 +92,16 @@ export const useUsersStore = defineStore("users", {
       }
     },
 
-    async updateUser(id: number, updates: Partial<User>) {
+    async updateUser(id: number, updates: Partial<UserDetail>) {
       this.loading = true
       const { put } = useApi()
       try {
-        const response = await put<User>(`/users/${id}`, updates)
-        const index = this.users.findIndex(u => u.id === id)
+        const response = await put<ApiResponse<UserDetail>>(`/users/${id}`, updates)
+        const index = this.users.findIndex((u: UserDetail) => u.id === id)
         if (index !== -1) {
-          this.users[index] = { ...this.users[index], ...response.data }
+          this.users[index] = { ...this.users[index], ...response.data.data }
         }
-        return response.data
+        return response.data.data
       } catch (err: unknown) {
         this.error = getErrorMessage(err) || "Failed to update user"
         throw err
@@ -104,8 +114,8 @@ export const useUsersStore = defineStore("users", {
       this.loading = true
       const { delete: del } = useApi()
       try {
-        await del<User>(`/users/${id}`)
-        this.users = this.users.filter(u => u.id !== id)
+        await del<ApiResponse<UserDetail>>(`/users/${id}`)
+        this.users = this.users.filter((u: UserDetail) => u.id !== id)
         this.total--
       } catch (err: unknown) {
         this.error = getErrorMessage(err) || "Failed to delete user"
