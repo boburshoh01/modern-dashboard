@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EditOutlined, SearchOutlined } from "@ant-design/icons-vue"
+import { EditOutlined, SearchOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons-vue"
 import { useOrganizationsStore } from "~/stores/organizations"
 import { useNotification } from "~/composables/useNotification"
 import type { Organization, OrganizationUpdateDto } from "~/types/organization"
@@ -21,6 +21,10 @@ const editingId = ref<number | null>(null)
 
 // Pagination & Search
 const searchQuery = ref("")
+const filters = reactive({
+  key: undefined as string | undefined, // tin, name, email
+  value: undefined as string | undefined,
+})
 const currentPage = ref(1)
 const pageSize = ref(10)
 
@@ -75,16 +79,35 @@ const columns = computed(() => [
 ])
 
 async function fetchData() {
-  await organizationsStore.fetchOrganizations({
+  const params: Record<string, any> = {
     page: currentPage.value,
     page_size: pageSize.value,
-    name: searchQuery.value || undefined,
-  })
+    start: (currentPage.value - 1) * pageSize.value,
+    limit: pageSize.value,
+  }
+
+  if (filters.key && filters.value) {
+    params[filters.key] = filters.value
+  }
+
+  if (searchQuery.value) {
+    params.name = searchQuery.value // fallback search by name if global search used
+  }
+
+  await organizationsStore.fetchOrganizations(params)
 }
 
 function handleTableChange(pag: TablePaginationConfig) {
   currentPage.value = pag.current || 1
   pageSize.value = pag.pageSize || 10
+  fetchData()
+}
+
+function resetFilters() {
+  filters.key = undefined
+  filters.value = undefined
+  searchQuery.value = ""
+  currentPage.value = 1
   fetchData()
 }
 
@@ -96,6 +119,14 @@ watch(searchQuery, () => {
     currentPage.value = 1
     fetchData()
   }, 300)
+})
+
+watch(() => [filters.key, filters.value], () => {
+    if (filters.key && filters.value) {
+         searchQuery.value = ""
+         currentPage.value = 1
+         fetchData()
+    }
 })
 
 // Data fetching
@@ -134,15 +165,48 @@ async function handleOk() {
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold text-[#202224] dark:text-white">{{ t('organizations.title') }}</h1>
-      <div class="flex gap-4">
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm flex flex-wrap items-center gap-4 border border-gray-100 dark:border-dark-border">
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <FilterOutlined class="text-gray-400 dark:text-gray-500" />
+        <span class="font-bold text-[#202224] dark:text-white">{{ t("common.filterBy") }}</span>
+      </div>
+
+      <a-select
+        v-model:value="filters.key"
+        placeholder="Field"
+        class="w-full sm:w-32 rounded-lg bg-[#F5F6FA] dark:bg-dark-main"
+        :bordered="false"
+      >
+        <a-select-option value="name">{{ t('organizations.name') }}</a-select-option>
+        <a-select-option value="tin">{{ t('organizations.tin') }}</a-select-option>
+        <a-select-option value="email">{{ t('organizations.email') }}</a-select-option>
+      </a-select>
+
+      <a-input
+        v-model:value="filters.value"
+        placeholder="Value"
+        class="w-full sm:w-48 bg-[#F5F6FA] dark:bg-dark-main dark:text-white border-none rounded-lg"
+      />
+
+      <a-button
+        class="text-[#EA0234] hover:text-red-700 hover:bg-red-50 border-none font-bold flex items-center gap-2 whitespace-nowrap"
+        @click="resetFilters"
+      >
+        <ReloadOutlined /> {{ t("common.resetFilter") }}
+      </a-button>
+
+      <div class="sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
         <a-input
           v-model:value="searchQuery"
           :placeholder="t('organizations.search')"
-          class="w-64"
+          class="search-input rounded-full w-full sm:w-64 h-[38px]"
+          :bordered="false"
           allow-clear
         >
            <template #prefix>
-             <SearchOutlined />
+             <SearchOutlined class="text-gray-400" />
            </template>
         </a-input>
       </div>

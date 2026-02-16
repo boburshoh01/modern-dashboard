@@ -159,10 +159,10 @@ onUnmounted(() => {
               v-if="!isMiniSidebar"
               class="text-xl font-extrabold flex items-center gap-2"
             >
-              <span class="text-[#4880ff] text-2xl">Dash</span>
-              <span class="text-[#202224] dark:text-white text-2xl">Stack</span>
+              <span class="text-[#4880ff] text-xl">Made In</span>
+              <span class="text-[#202224] dark:text-white text-xl">Uzbekistan</span>
             </h1>
-            <span v-else class="text-[#4880ff] text-2xl font-extrabold">D</span>
+            <span v-else class="text-[#4880ff] text-2xl font-extrabold">M</span>
           </div>
 
           <button

@@ -252,7 +252,9 @@
       "user": "User",
       "moderator": "Moderator",
       "admin": "Admin"
-    }
+    },
+    "filterBy": "Filter By",
+    "resetFilter": "Reset Filter"
   },
   "validation": {
     "required": "{field} is required",

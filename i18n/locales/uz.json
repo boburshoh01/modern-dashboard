@@ -252,7 +252,9 @@
       "user": "Foydalanuvchi",
       "moderator": "Moderator",
       "admin": "Admin"
-    }
+    },
+    "filterBy": "Filtrlash",
+    "resetFilter": "Filtrni tozalash"
   },
   "validation": {
     "required": "{field} majburiy maydon",

@@ -15,21 +15,24 @@ export const useCategoriesStore = defineStore("categories", {
             this.error = null
             try {
                 if (params) {
-                    const { data } = await useApi().get<CategoryResponse>("/category/paging/list", { params })
-                    if (data && Array.isArray(data.items)) {
-                        this.categories = data.items
-                        this.total = data.total
+                    const { data } = await useApi().get<any>("/category/paging/list", { params })
+                    // Handle nested data structure: response.data.data.items
+                    const result = data.data || data
+                    if (result && Array.isArray(result.items)) {
+                        this.categories = result.items
+                        this.total = result.total
                     } else {
                         this.categories = []
                         this.total = 0
                     }
                 } else {
-                    const { data } = await useApi().get<Category[]>("/category/list")
-                    if (data && Array.isArray(data)) {
-                        this.categories = data
-                        this.total = data.length
+                    const { data } = await useApi().get<any>("/category/list")
+                    // Handle nested data structure: response.data or response
+                    const result = data.data || data
+                    if (result && Array.isArray(result)) {
+                        this.categories = result
+                        this.total = result.length
                     } else {
-                        // Handle case where API might return wrapped object even for list
                         this.categories = []
                         this.total = 0
                     }

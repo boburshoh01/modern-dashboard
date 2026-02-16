@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { PlusOutlined, EditOutlined, SearchOutlined, GlobalOutlined } from "@ant-design/icons-vue"
+import { PlusOutlined, EditOutlined, SearchOutlined, GlobalOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons-vue"
 import { useCountriesStore } from "~/stores/countries"
 import { useNotification } from "~/composables/useNotification"
-import type { Country, CountryCreateDto, CountryName } from "~/types/country"
+import type { CountryCreateDto, CountryName } from "~/types/country"
 import type { TablePaginationConfig } from 'ant-design-vue';
 
 definePageMeta({
@@ -22,11 +22,15 @@ const editingCode = ref<string | null>(null)
 
 // Pagination & Search
 const searchQuery = ref("")
+const filters = reactive({
+  key: undefined as string | undefined,
+  value: undefined as string | undefined,
+})
 const currentPage = ref(1)
 const pageSize = ref(10)
 
 const pagination = computed(() => ({
-  total: countriesStore.total,
+  total: countriesStore.countries.length, // Client-side total
   current: currentPage.value,
   pageSize: pageSize.value,
   showSizeChanger: true,
@@ -85,9 +89,28 @@ function handleTableChange(pag: TablePaginationConfig) {
   pageSize.value = pag.pageSize || 10
 }
 
-// Watch search
+function resetFilters() {
+  filters.key = undefined
+  filters.value = undefined
+  searchQuery.value = ""
+  currentPage.value = 1
+}
+
+// Watch search and filters
 const filteredCountries = computed(() => {
     let data = countriesStore.countries || []
+    
+    // Filter by specific key/value
+    if (filters.key && filters.value) {
+        const val = filters.value.toLowerCase()
+        data = data.filter(c => {
+            if (filters.key === 'code') return c.code.toLowerCase().includes(val)
+            if (filters.key === 'name') return getLocalizedName(c.name).toLowerCase().includes(val)
+            return false
+        })
+    }
+
+    // Global Search
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase()
         data = data.filter(c => 
@@ -95,6 +118,7 @@ const filteredCountries = computed(() => {
             getLocalizedName(c.name).toLowerCase().includes(query)
         )
     }
+    
     // Client-side pagination since API seems to be list-all for now
     const start = (currentPage.value - 1) * pageSize.value
     const end = start + pageSize.value
@@ -116,7 +140,7 @@ function handleAdd() {
   isModalVisible.value = true
 }
 
-function handleEdit(record: Country) {
+function handleEdit(record: any) {
   isEditing.value = true
   editingCode.value = record.code
   Object.assign(formState, {
@@ -163,22 +187,54 @@ async function handleOk() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <h1 class="text-3xl font-bold text-[#202224] dark:text-white">{{ t('countries.title') }}</h1>
-      <div class="flex gap-4">
+      <a-button type="primary" size="large" @click="handleAdd" class="bg-[#4880ff] h-11 px-6 rounded-lg font-semibold flex items-center gap-2 shadow-sm border-none">
+        <PlusOutlined /> {{ t('countries.addCountry') }}
+      </a-button>
+    </div>
+
+    <div class="bg-white dark:bg-dark-card p-4 rounded-xl shadow-sm flex flex-wrap items-center gap-4 border border-gray-100 dark:border-dark-border">
+      <div class="flex items-center gap-2 whitespace-nowrap">
+        <FilterOutlined class="text-gray-400 dark:text-gray-500" />
+        <span class="font-bold text-[#202224] dark:text-white">{{ t("common.filterBy") }}</span>
+      </div>
+
+      <a-select
+        v-model:value="filters.key"
+        placeholder="Field"
+        class="w-full sm:w-32 rounded-lg bg-[#F5F6FA] dark:bg-dark-main"
+        :bordered="false"
+      >
+        <a-select-option value="name">{{ t('countries.name') }}</a-select-option>
+        <a-select-option value="code">{{ t('countries.code') }}</a-select-option>
+      </a-select>
+
+      <a-input
+        v-model:value="filters.value"
+        placeholder="Value"
+        class="w-full sm:w-48 bg-[#F5F6FA] dark:bg-dark-main dark:text-white border-none rounded-lg"
+      />
+
+      <a-button
+        class="text-[#EA0234] hover:text-red-700 hover:bg-red-50 border-none font-bold flex items-center gap-2 whitespace-nowrap"
+        @click="resetFilters"
+      >
+        <ReloadOutlined /> {{ t("common.resetFilter") }}
+      </a-button>
+
+      <div class="sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
         <a-input
           v-model:value="searchQuery"
           :placeholder="t('countries.search')"
-          class="w-64"
+          class="search-input rounded-full w-full sm:w-64 h-[38px]"
+          :bordered="false"
           allow-clear
         >
            <template #prefix>
-             <SearchOutlined />
+             <SearchOutlined class="text-gray-400" />
            </template>
         </a-input>
-        <a-button type="primary" size="large" @click="handleAdd">
-          <PlusOutlined /> {{ t('countries.addCountry') }}
-        </a-button>
       </div>
     </div>
 
