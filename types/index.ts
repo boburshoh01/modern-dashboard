@@ -121,6 +121,12 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface ResetPasswordCredentials {
+  token: string
+  password: string
+  confirmPassword: string
+}
+
 export interface AuthUser {
   id: number
   username: string

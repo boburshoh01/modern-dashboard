@@ -1,4 +1,4 @@
-import type { AuthUser, LoginCredentials, RefreshTokenResponse, OAuthAuthorizeResponse, OAuthLoginResponse } from "~/types"
+import type { AuthUser, LoginCredentials, RefreshTokenResponse, OAuthAuthorizeResponse, OAuthLoginResponse, ResetPasswordCredentials } from "~/types"
 import { defineStore } from "pinia"
 
 export const useAuthStore = defineStore("auth", {
@@ -297,6 +297,49 @@ export const useAuthStore = defineStore("auth", {
           // With OneID we don't have /auth/me, so just trust the token
           this.isAuthenticated = true
         }
+      }
+    },
+
+    async forgotPassword(email: string) {
+      this.loading = true
+      this.error = null
+      const config = useRuntimeConfig()
+
+      try {
+        await $fetch("/password/reset/request", {
+          method: "POST",
+          params: { email },
+          baseURL: config.public.apiBase as string,
+        })
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "Forgot password request failed"
+        console.error("Forgot password error:", err)
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async resetPassword(payload: ResetPasswordCredentials) {
+      this.loading = true
+      this.error = null
+      const config = useRuntimeConfig()
+
+      try {
+        await $fetch("/password/reset/confirm", {
+          method: "POST",
+          params: {
+            token: payload.token,
+            new_password: payload.password,
+          },
+          baseURL: config.public.apiBase as string,
+        })
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : "Reset password request failed"
+        console.error("Reset password error:", err)
+        throw err
+      } finally {
+        this.loading = false
       }
     },
   },

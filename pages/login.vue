@@ -232,6 +232,7 @@ onMounted(async () => {
                 <button
                   type="button"
                   class="text-[16px] text-[#202224]/60 hover:text-[#202224]/80 transition-colors tracking-[-0.0643px] border-none bg-transparent cursor-pointer"
+                  @click="router.push('/forgot-password')"
                 >
                   {{ $t("auth.forgotPassword") }}
                 </button>
